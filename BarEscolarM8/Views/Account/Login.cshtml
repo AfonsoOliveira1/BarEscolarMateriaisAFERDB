@@ -1,0 +1,38 @@
+@model APiConsumer.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<h1 class="page-title login-page-title">Login</h1>
+
+<div class="generic-card login-card">
+    <form asp-action="Login" method="post" class="login-form">
+        <div asp-validation-summary="ModelOnly" class="validation-error"></div>
+
+        <div class="form-group">
+            <label asp-for="EmailOrUsername" class="form-label"></label>
+            <input asp-for="EmailOrUsername" class="form-input" />
+            <span asp-validation-for="EmailOrUsername" class="validation-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" type="password" class="form-input" />
+            <span asp-validation-for="Password" class="validation-error"></span>
+        </div>
+
+        <div class="form-group">
+            <input asp-for="RememberMe" type="checkbox" /> <label asp-for="RememberMe">Remember me</label>
+        </div>
+
+        <button type="submit" class="btn main-btn">Entrar</button>
+
+        <a asp-action="Register" class="btn secondary-btn login-register-btn">
+            Registrar
+        </a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
