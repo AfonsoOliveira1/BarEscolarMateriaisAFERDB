@@ -116,7 +116,7 @@ namespace BarEscolar.Controllers
         }
 
         // ---------------- MENU DAYS ----------------
-        public async Task<IActionResult> CreateDay(int weekId)
+        public IActionResult CreateDay(int weekId)
         {
             if (!IsAdmin())
                 return RedirectToAction("Login", "Login");
@@ -126,6 +126,7 @@ namespace BarEscolar.Controllers
                 menuweekid = weekId,
                 date = DateOnly.FromDateTime(DateTime.Today).ToString()
             };
+
             return View(day);
         }
 
