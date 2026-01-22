@@ -51,7 +51,7 @@ namespace APiConsumer.Services
             }
             catch
             {
-                // ignore and use fallback 1
+                // ignore and use fallback 
             }
 
             var newUser = new USERS
