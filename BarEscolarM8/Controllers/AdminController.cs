@@ -50,7 +50,7 @@ namespace BarEscolar.Controllers
                 return RedirectToAction("Login", "Login");
 
             var users = await _usersApi.GetUsersAsync();
-            return View(users); // criar IndexUsers.cshtm
+            return View(users); // criar IndexUsers.cshtml
         }
 
         public IActionResult CreateUser()
