@@ -18,10 +18,14 @@ builder.Services.AddHttpClient("APIBarEscola", client =>
         new MediaTypeWithQualityHeaderValue("application/json"));
 });
 
-
-builder.Services.AddScoped<UsersApiClient>();
 builder.Services.AddScoped<RolesApiClient>();
-builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddScoped<MenuWeeksApiClient>();
+builder.Services.AddScoped<MenuDaysApiClient>();
+builder.Services.AddScoped<ProductsApiClient>();
+builder.Services.AddScoped<CategoryApiClient>();
+builder.Services.AddScoped<UsersApiClient>();
+builder.Services.AddScoped<OrdersApiClient>();
+builder.Services.AddScoped<OrderItemsApiClient>();
 
 
 builder.Services

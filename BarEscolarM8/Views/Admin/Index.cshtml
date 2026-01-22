@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h2>Admin Dashboard</h2>
+
+<div>
+    <h3>Welcome, @ViewBag.User?.FullName</h3>
+    <ul>
+        <li><a asp-controller="Admin" asp-action="Users" asp-route-userid="@ViewBag.User?.Id">Manage Users</a></li>
+        <li><a asp-controller="Admin" asp-action="MenuWeeks" asp-route-id="@ViewBag.User?.Id">Manage Menu Weeks</a></li>
+        <li><a asp-controller="Admin" asp-action="Products" asp-route-id="@ViewBag.User?.Id">Manage Products</a></li>
+        <li><a asp-controller="Admin" asp-action="Categories" asp-route-id="@ViewBag.User?.Id">Manage Categories</a></li>
+    </ul>
+</div>

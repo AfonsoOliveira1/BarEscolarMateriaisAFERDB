@@ -1,0 +1,39 @@
+﻿@model List<APiConsumer.Models.USERS>
+@{
+    ViewData["Title"] = "Users Management";
+}
+
+<h2>Users Management</h2>
+
+<p>
+    <a asp-action="CreateUser" asp-route-userid="@ViewBag.User?.Id" class="btn btn-primary">Create New User</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.fullname</td>
+                <td>@u.email</td>
+                <td>@u.username</td>
+                <td>@(u.role == 0 ? "Student" : u.role == 1 ? "Employee" : "Admin")</td>
+                <td>
+                    <a asp-action="EditUser" asp-route-userid="@ViewBag.User?.Id" asp-route-id="@u.id" class="btn btn-sm btn-warning">Edit</a>
+                    <form asp-action="DeleteUser" asp-route-userid="@ViewBag.User?.Id" asp-route-id="@u.id" method="post" style="display:inline">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

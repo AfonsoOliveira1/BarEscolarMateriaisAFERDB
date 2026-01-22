@@ -36,7 +36,7 @@ namespace APiConsumer.Services
             }
         }
 
-        // NOW returns (Success, ErrorMessage) so caller can know why API failed
+        // ORIGINAL: CreateUserAsync sending just USERS object
         public async Task<(bool Success, string? Error)> CreateUserAsync(USERS user)
         {
             try
@@ -44,36 +44,53 @@ namespace APiConsumer.Services
                 var response = await _httpClient.PostAsJsonAsync("api/User", user);
 
                 if (response.IsSuccessStatusCode)
-                {
                     return (true, null);
-                }
 
-                // read error body (may contain modelstate/errors)
                 string body = string.Empty;
-                try
-                {
-                    body = await response.Content.ReadAsStringAsync();
-                }
-                catch { /* ignore read errors */ }
+                try { body = await response.Content.ReadAsStringAsync(); } catch { }
 
-                // prefer body if available, otherwise include status
                 var errorMsg = !string.IsNullOrWhiteSpace(body)
                     ? $"{(int)response.StatusCode} {response.ReasonPhrase}: {body}"
                     : $"{(int)response.StatusCode} {response.ReasonPhrase}";
 
                 return (false, errorMsg);
             }
-            catch (HttpRequestException ex)
-            {
-                return (false, $"Network error: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Unexpected error: {ex.Message}");
-            }
+            catch (HttpRequestException ex) { return (false, $"Network error: {ex.Message}"); }
+            catch (Exception ex) { return (false, $"Unexpected error: {ex.Message}"); }
         }
 
-        // keep others simple (you can expand similarly)
+        // NEW: overload to create user with password
+        public async Task<(bool Success, string? Error)> CreateUserAsync(USERS user, string password)
+        {
+            try
+            {
+                var payload = new
+                {
+                    user.fullname,
+                    user.email,
+                    user.username,
+                    Password = password, // API handles hashing
+                    user.role
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("api/User", payload);
+
+                if (response.IsSuccessStatusCode)
+                    return (true, null);
+
+                string body = string.Empty;
+                try { body = await response.Content.ReadAsStringAsync(); } catch { }
+
+                var errorMsg = !string.IsNullOrWhiteSpace(body)
+                    ? $"{(int)response.StatusCode} {response.ReasonPhrase}: {body}"
+                    : $"{(int)response.StatusCode} {response.ReasonPhrase}";
+
+                return (false, errorMsg);
+            }
+            catch (HttpRequestException ex) { return (false, $"Network error: {ex.Message}"); }
+            catch (Exception ex) { return (false, $"Unexpected error: {ex.Message}"); }
+        }
+
         public async Task<bool> UpdateUserAsync(USERS user)
         {
             try
