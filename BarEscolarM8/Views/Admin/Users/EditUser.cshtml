@@ -25,10 +25,10 @@
     </div>
     <div class="form-group">
         <label>Role</label>
-        <select name="role">
-             <option value="0" @(Model.role == 0 ? "selected" : null)>Student</option>
-             <option value="1" @(Model.role == 1 ? "selected" : null)>Employee</option>
-             <option value="2" @(Model.role == 2 ? "selected" : null)>Admin</option>
+        <select asp-for="role" class="form-control">
+            <option value="0">Student</option>
+            <option value="1">Employee</option>
+            <option value="2">Admin</option>
         </select>
     </div>
     <br />

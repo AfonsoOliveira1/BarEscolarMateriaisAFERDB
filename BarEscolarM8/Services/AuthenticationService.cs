@@ -42,7 +42,7 @@ namespace APiConsumer.Services
                 return (false, "Email already registered.");
 
             // Get the role id from API (fallback to 1 if unavailable)
-            int roleId = 1;
+            int roleId = 0;
             try
             {
                 var roleFromDb = await _rolesApi.GetRoleAsync(1);
