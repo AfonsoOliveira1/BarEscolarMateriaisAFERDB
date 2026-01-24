@@ -1,0 +1,35 @@
+﻿@model List<APiConsumer.Models.MENUWEEK>
+@{
+    ViewData["Title"] = "Menu Weeks";
+}
+
+<h2>Menu Weeks</h2>
+
+<p>
+    <a asp-action="CreateWeek" class="btn btn-primary">Create New Week</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Week Start</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var week in Model)
+        {
+            <tr>
+                <td>@week.id</td>
+                <td>@week.weekstart</td>
+                <td>
+                    <a asp-action="EditWeek" asp-route-id="@week.id" class="btn btn-sm btn-warning">Edit</a>
+                    <form asp-action="DeleteWeek" asp-route-id="@week.id" method="post" style="display:inline">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this week?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

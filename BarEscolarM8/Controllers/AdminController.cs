@@ -1,10 +1,13 @@
 ﻿using APiConsumer.Models;
 using APiConsumer.Services;
-using Microsoft.AspNetCore.Http;
+using BarEscolarM8.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BarEscolar.Controllers
+namespace APiConsumer.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly MenuWeeksApiClient _menuWeeksApi;
@@ -30,54 +33,101 @@ namespace BarEscolar.Controllers
         // ---------------- DASHBOARD ----------------
         public async Task<IActionResult> Index()
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
+            ViewBag.Weeks = await _menuWeeksApi.GetMenuWeeksAsync();
+            ViewBag.Products = await _productsApi.GetProductsAsync();
+            ViewBag.Categories = await _categoriesApi.GetCategoriesAsync();
 
-            var weeks = await _menuWeeksApi.GetMenuWeeksAsync();
-            var products = await _productsApi.GetProductsAsync();
-            var categories = await _categoriesApi.GetCategoriesAsync();
-
-            ViewBag.Weeks = weeks;
-            ViewBag.Products = products;
-            ViewBag.Categories = categories;
             return View();
         }
 
-        // ---------------- USERS MANAGEMENT ----------------
+        // ---------------- USERS ----------------
         public async Task<IActionResult> Users()
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
-
             var users = await _usersApi.GetUsersAsync();
-            return View(users); // criar IndexUsers.cshtml
+            return View("Users/IndexUsers", users);
         }
 
         public IActionResult CreateUser()
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
-            return View();
+            return View("Users/CreateUser");
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser(string fullName, string email, string username, string password, int role)
+        public async Task<IActionResult> CreateUser(string fullName,string email,string username,string password, int role)
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
+            var hasher = new PasswordHasher<USERS>();
 
             var newUser = new USERS
             {
+                id = Guid.NewGuid().ToString(),
                 fullname = fullName,
                 email = email,
                 username = username,
                 role = role
             };
 
-            var (Success, Error) = await _usersApi.CreateUserAsync(newUser, password);
+            newUser.passwordhash = hasher.HashPassword(newUser, password);
 
-            if (!Success) // if API call failed
-                return BadRequest($"Erro ao criar usuário: {Error}");
+            var (success, error) = await _usersApi.CreateUserAsync(newUser);
+
+            if (!success)
+            {
+                ModelState.AddModelError("", error ?? "Failed to create user");
+                return View("Users/CreateUser");
+            }
+
+            return RedirectToAction("Users");
+        }
+        public async Task<IActionResult> EditUser(string id)
+        {
+            var user = await _usersApi.GetUserAsync(id);
+
+            if (user == null)
+                return NotFound();
+
+            return View("Users/EditUser", user);
+        }
+        [HttpPost]
+        public async Task<IActionResult> EditUser( string id, string fullName,string email,string username,string? password,int role)
+        {
+            var user = await _usersApi.GetUserAsync(id);
+            if (user == null)
+                return NotFound();
+
+            user.fullname = fullName;
+            user.email = email;
+            user.username = username;
+            user.role = role;
+
+            // only update password if provided
+            if (!string.IsNullOrWhiteSpace(password))
+            {
+                user.passwordhash = password;
+            }
+
+            var success = await _usersApi.UpdateUserAsync(user);
+
+            if (!success)
+            {
+                ModelState.AddModelError("", "Failed to update user");
+                return View("Users/EditUser", user);
+            }
+
+            return RedirectToAction("Users");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest();
+
+            var success = await _usersApi.DeleteUserAsync(id);
+
+            if (!success)
+            {
+                TempData["Error"] = "Failed to delete user.";
+            }
 
             return RedirectToAction("Users");
         }
@@ -86,41 +136,85 @@ namespace BarEscolar.Controllers
         // ---------------- MENU WEEKS ----------------
         public async Task<IActionResult> MenuWeeks()
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
-
+            // List all weeks
             var weeks = await _menuWeeksApi.GetMenuWeeksAsync();
-            return View(weeks);
+            return View("MenuWeeks", weeks); 
         }
 
         public IActionResult CreateWeek()
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
-            return View();
+            return View("MenuWeeks/Create",new CreateWeekViewModel { WeekStart = DateTime.Today });
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateWeek(DateTime weekStart)
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
+            if (weekStart.DayOfWeek != DayOfWeek.Monday)
+            {
+                ModelState.AddModelError("weekStart", "A semana tem que começar numa Segunda como é lógico.");
+                ViewBag.EnteredDate = weekStart.ToString("yyyy-MM-dd");
+                return View("MenuWeeks/Create");
+            }
 
             var week = new MENUWEEK
             {
                 weekstart = weekStart.ToString("yyyy-MM-dd")
             };
 
-            await _menuWeeksApi.CreateMenuWeekAsync(week);
+            var success = await _menuWeeksApi.CreateMenuWeekAsync(week);
+
+            if (!success)
+            {
+                ModelState.AddModelError("", "Falha ao criar a semana.");
+                ViewBag.EnteredDate = weekStart.ToString("yyyy-MM-dd");
+                return View("MenuWeeks/Create");
+            }
+
+            TempData["Success"] = "Semana criada com sucesso!";
+            return RedirectToAction("MenuWeeks"); 
+        }
+
+
+
+
+        public async Task<IActionResult> EditWeek(int id)
+        {
+            var week = await _menuWeeksApi.GetMenuWeekAsync(id);
+            if (week == null) return NotFound();
+
+            return View(week); 
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditWeek(MENUWEEK week)
+        {
+            if (!ModelState.IsValid) return View(week);
+
+            var success = await _menuWeeksApi.UpdateMenuWeekAsync(week);
+
+            if (!success)
+            {
+                ModelState.AddModelError("", "Failed to update menu week.");
+                return View(week);
+            }
+
             return RedirectToAction("MenuWeeks");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteWeek(int id)
+        {
+            var success = await _menuWeeksApi.DeleteMenuWeekAsync(id);
+
+            if (!success) TempData["Error"] = "Failed to delete week.";
+
+            return RedirectToAction("MenuWeeks");
+        }
+
 
         // ---------------- MENU DAYS ----------------
         public IActionResult CreateDay(int weekId)
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
-
             var day = new MENUDAY
             {
                 menuweekid = weekId,
@@ -133,9 +227,6 @@ namespace BarEscolar.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateDay(MENUDAY day)
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
-
             await _menuDaysApi.CreateMenuDayAsync(day);
             return RedirectToAction("MenuWeeks");
         }
@@ -143,30 +234,16 @@ namespace BarEscolar.Controllers
         // ---------------- PRODUCTS ----------------
         public async Task<IActionResult> Products()
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
-
+            ViewBag.Categories = await _categoriesApi.GetCategoriesAsync();
             var products = await _productsApi.GetProductsAsync();
-            var categories = await _categoriesApi.GetCategoriesAsync();
-            ViewBag.Categories = categories;
             return View(products);
         }
 
         // ---------------- CATEGORIES ----------------
         public async Task<IActionResult> Categories()
         {
-            if (!IsAdmin())
-                return RedirectToAction("Login", "Login");
-
             var categories = await _categoriesApi.GetCategoriesAsync();
             return View(categories);
-        }
-
-        // ---------------- HELPER ----------------
-        private bool IsAdmin()
-        {
-            var role = HttpContext.Session.GetInt32("UserRole");
-            return role == 2; // 0 = Student, 1 = Employee, 2 = Admin
         }
     }
 }

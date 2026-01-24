@@ -13,30 +13,30 @@ namespace APiConsumer.Services
 
         public async Task<List<PRODUCTS>> GetProductsAsync()
         {
-            var result = await _httpClient.GetFromJsonAsync<List<PRODUCTS>>("api/PRODUCTS");
+            var result = await _httpClient.GetFromJsonAsync<List<PRODUCTS>>("api/PRODUCT");
             return result ?? new List<PRODUCTS>();
         }
 
         public async Task<PRODUCTS?> GetProductAsync(int id)
         {
-            return await _httpClient.GetFromJsonAsync<PRODUCTS>($"api/PRODUCTS/{id}");
+            return await _httpClient.GetFromJsonAsync<PRODUCTS>($"api/PRODUCT/{id}");
         }
 
         public async Task<bool> CreateProductAsync(PRODUCTS product)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/PRODUCTS", product);
+            var response = await _httpClient.PostAsJsonAsync("api/PRODUCT", product);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> UpdateProductAsync(PRODUCTS product)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/PRODUCTS/{product.id}", product);
+            var response = await _httpClient.PutAsJsonAsync($"api/PRODUCT/{product.id}", product);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteProductAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"api/PRODUCTS/{id}");
+            var response = await _httpClient.DeleteAsync($"api/PRODUCT/{id}");
             return response.IsSuccessStatusCode;
         }
     }

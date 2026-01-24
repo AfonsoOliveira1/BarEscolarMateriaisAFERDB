@@ -1,103 +1,96 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using APiConsumer.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace APiConsumer.Services
 {
     public class AuthenticationService
     {
         private readonly UsersApiClient _usersApi;
-        private readonly RolesApiClient _rolesApi;
         private readonly PasswordHasher<USERS> _passwordHasher;
 
-        public AuthenticationService(UsersApiClient usersApi, RolesApiClient rolesApi)
+        public AuthenticationService(UsersApiClient usersApi)
         {
             _usersApi = usersApi;
-            _rolesApi = rolesApi;
             _passwordHasher = new PasswordHasher<USERS>();
         }
 
+        // ---------- LOGIN ----------
         public async Task<USERS?> AuthenticateAsync(string emailOrUsername, string password)
         {
             var users = await _usersApi.GetUsersAsync();
+
             var user = users.FirstOrDefault(u =>
-                string.Equals(u.username, emailOrUsername, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(u.email, emailOrUsername, StringComparison.OrdinalIgnoreCase));
+                u.username.Equals(emailOrUsername, StringComparison.OrdinalIgnoreCase) ||
+                u.email.Equals(emailOrUsername, StringComparison.OrdinalIgnoreCase));
 
-            if (user == null) return null;
+            if (user == null)
+                return null;
 
-            var result = _passwordHasher.VerifyHashedPassword(user, user.passwordhash, password);
+            var result = _passwordHasher.VerifyHashedPassword(
+                user,
+                user.passwordhash,
+                password
+            );
+
             return result == PasswordVerificationResult.Success ? user : null;
         }
 
-        // Now returns API error message when creation fails
-        public async Task<(bool Success, string? Error)> RegisterAsync(string fullName, string username, string email, string password)
+        // ---------- REGISTER ----------
+        public async Task<(bool Success, string? Error)> RegisterAsync(
+            string fullName,
+            string username,
+            string email,
+            string password)
         {
             var users = await _usersApi.GetUsersAsync();
 
-            if (users.Any(u => string.Equals(u.username, username, StringComparison.OrdinalIgnoreCase)))
+            if (users.Any(u => u.username.Equals(username, StringComparison.OrdinalIgnoreCase)))
                 return (false, "Username already taken.");
 
-            if (users.Any(u => string.Equals(u.email, email, StringComparison.OrdinalIgnoreCase)))
+            if (users.Any(u => u.email.Equals(email, StringComparison.OrdinalIgnoreCase)))
                 return (false, "Email already registered.");
-
-            // Get the role id from API (fallback to 1 if unavailable)
-            int roleId = 0;
-            try
-            {
-                var roleFromDb = await _rolesApi.GetRoleAsync(1);
-                if (roleFromDb != null)
-                    roleId = roleFromDb.id;
-            }
-            catch
-            {
-                // ignore and use fallback 
-            }
 
             var newUser = new USERS
             {
                 id = Guid.NewGuid().ToString(),
-                username = username,
                 fullname = fullName,
+                username = username,
                 email = email,
-                role = roleId
+                role = 0 // Student by default
             };
 
             newUser.passwordhash = _passwordHasher.HashPassword(newUser, password);
 
-            var (ok, apiError) = await _usersApi.CreateUserAsync(newUser);
+            var (ok, error) = await _usersApi.CreateUserAsync(newUser);
             if (!ok)
-                return (false, apiError ?? "API error creating user.");
+                return (false, error);
 
             return (true, null);
         }
 
-        // CreatePrincipalAsync unchanged...
-        public async Task<ClaimsPrincipal> CreatePrincipalAsync(USERS user)
+        // ---------- CLAIMS ----------
+        public Task<ClaimsPrincipal> CreatePrincipalAsync(USERS user)
         {
-            string userName = user.username ?? string.Empty;
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.id ?? string.Empty),
-                new Claim(ClaimTypes.Name, userName)
+                new Claim(ClaimTypes.NameIdentifier, user.id ?? ""),
+                new Claim(ClaimTypes.Name, user.username ?? "")
             };
 
-            if (user.role.HasValue)
+            string roleName = user.role switch
             {
-                try
-                {
-                    var roleObj = await _rolesApi.GetRoleAsync(user.role.Value);
-                    string roleName = roleObj?.role1 ?? user.role.Value.ToString();
-                    claims.Add(new Claim(ClaimTypes.Role, roleName));
-                }
-                catch
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, user.role.Value.ToString()));
-                }
-            }
+                0 => "Student",
+                1 => "Employee",
+                2 => "Admin",
+                _ => "Student"
+            };
 
-            var identity = new ClaimsIdentity(claims, "cookies");
-            return new ClaimsPrincipal(identity);
+            claims.Add(new Claim(ClaimTypes.Role, roleName));
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            return Task.FromResult(new ClaimsPrincipal(identity));
         }
     }
 }

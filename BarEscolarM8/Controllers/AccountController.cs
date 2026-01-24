@@ -38,13 +38,21 @@ namespace APiConsumer.Controllers
 
             var principal = await _authService.CreatePrincipalAsync(user);
             var props = new AuthenticationProperties { IsPersistent = model.RememberMe };
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, props);
 
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                principal,
+                props
+            );
 
+            // ? ADMIN ? ADMIN DASHBOARD
+            if (user.role == 2)
+                return RedirectToAction("Index", "Admin");
+
+            // fallback
             return RedirectToAction("Index", "Home");
         }
+
 
         [HttpGet]
         public IActionResult Register()

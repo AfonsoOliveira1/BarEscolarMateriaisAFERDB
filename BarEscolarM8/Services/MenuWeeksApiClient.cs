@@ -13,30 +13,30 @@ namespace APiConsumer.Services
 
         public async Task<List<MENUWEEK>> GetMenuWeeksAsync()
         {
-            var result = await _httpClient.GetFromJsonAsync<List<MENUWEEK>>("api/MENUWEEKS");
+            var result = await _httpClient.GetFromJsonAsync<List<MENUWEEK>>("api/MenuWeek");
             return result ?? new List<MENUWEEK>();
         }
 
         public async Task<MENUWEEK?> GetMenuWeekAsync(int id)
         {
-            return await _httpClient.GetFromJsonAsync<MENUWEEK>($"api/MENUWEEKS/{id}");
+            return await _httpClient.GetFromJsonAsync<MENUWEEK>($"api/MenuWeek/{id}");
         }
 
         public async Task<bool> CreateMenuWeekAsync(MENUWEEK week)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/MENUWEEKS", week);
+            var response = await _httpClient.PostAsJsonAsync("api/MenuWeek", week);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> UpdateMenuWeekAsync(MENUWEEK week)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/MENUWEEKS/{week.id}", week);
+            var response = await _httpClient.PutAsJsonAsync($"api/MenuWeek/{week.id}", week);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteMenuWeekAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"api/MENUWEEKS/{id}");
+            var response = await _httpClient.DeleteAsync($"api/MenuWeek/{id}");
             return response.IsSuccessStatusCode;
         }
     }

@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Create Week";
+}
+
+<h2>Create Week</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<form asp-action="CreateWeek" method="post">
+    <div class="form-group">
+        <label for="weekStart">Start Date</label>
+        <input type="date" id="weekStart" name="weekStart" class="form-control"
+               value="@(ViewBag.EnteredDate ?? DateTime.Today.ToString("yyyy-MM-dd"))" required />
+        <span class="text-danger">
+            @foreach (var err in ViewData.ModelState["weekStart"]?.Errors ?? Enumerable.Empty<Microsoft.AspNetCore.Mvc.ModelBinding.ModelError>())
+            {
+                @err.ErrorMessage
+            }
+        </span>
+    </div>
+
+    <br />
+    <button type="submit" class="btn btn-success">Create Week</button>
+    <a asp-action="MenuWeeks" class="btn btn-secondary">Cancel</a>
+</form>

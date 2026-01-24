@@ -4,12 +4,40 @@
 
 <h2>Admin Dashboard</h2>
 
+<p>Welcome, <strong>@User.Identity.Name</strong></p>
+
+<hr />
+
+<ul class="admin-menu">
+    <li>
+        <a asp-controller="Admin" asp-action="Users">
+            Manage Users
+        </a>
+    </li>
+    <li>
+        <a asp-controller="Admin" asp-action="MenuWeeks">
+             Manage Menu Weeks
+        </a>
+    </li>
+    <li>
+        <a asp-controller="Admin" asp-action="Products">
+            Manage Products
+        </a>
+    </li>
+    <li>
+        <a asp-controller="Admin" asp-action="Categories">
+             Manage Categories
+        </a>
+    </li>
+</ul>
+
+<hr />
+
 <div>
-    <h3>Welcome, @ViewBag.User?.FullName</h3>
+    <h4>Quick Stats</h4>
     <ul>
-        <li><a asp-controller="Admin" asp-action="Users" asp-route-userid="@ViewBag.User?.Id">Manage Users</a></li>
-        <li><a asp-controller="Admin" asp-action="MenuWeeks" asp-route-id="@ViewBag.User?.Id">Manage Menu Weeks</a></li>
-        <li><a asp-controller="Admin" asp-action="Products" asp-route-id="@ViewBag.User?.Id">Manage Products</a></li>
-        <li><a asp-controller="Admin" asp-action="Categories" asp-route-id="@ViewBag.User?.Id">Manage Categories</a></li>
+        <li>Total Weeks: @ViewBag.Weeks?.Count</li>
+        <li>Total Products: @ViewBag.Products?.Count</li>
+        <li>Total Categories: @ViewBag.Categories?.Count</li>
     </ul>
 </div>

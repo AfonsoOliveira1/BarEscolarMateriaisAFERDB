@@ -16,34 +16,34 @@ namespace APiConsumer.Services
         // Get all categories
         public async Task<List<CATEGORIES>> GetCategoriesAsync()
         {
-            var result = await _httpClient.GetFromJsonAsync<List<CATEGORIES>>("api/Categories");
+            var result = await _httpClient.GetFromJsonAsync<List<CATEGORIES>>("api/Category");
             return result ?? new List<CATEGORIES>();
         }
 
         // Get a single category by ID
         public async Task<CATEGORIES?> GetCategoryAsync(int id)
         {
-            return await _httpClient.GetFromJsonAsync<CATEGORIES>($"api/Categories/{id}");
+            return await _httpClient.GetFromJsonAsync<CATEGORIES>($"api/Category/{id}");
         }
 
         // Create a new category
         public async Task<bool> CreateCategoryAsync(CATEGORIES category)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/Categories", category);
+            var response = await _httpClient.PostAsJsonAsync("api/Category", category);
             return response.IsSuccessStatusCode;
         }
 
         // Update an existing category
         public async Task<bool> UpdateCategoryAsync(CATEGORIES category)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/Categories/{category.id}", category);
+            var response = await _httpClient.PutAsJsonAsync($"api/Category/{category.id}", category);
             return response.IsSuccessStatusCode;
         }
 
         // Delete a category by ID
         public async Task<bool> DeleteCategoryAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"api/Categories/{id}");
+            var response = await _httpClient.DeleteAsync($"api/Category/{id}");
             return response.IsSuccessStatusCode;
         }
     }
