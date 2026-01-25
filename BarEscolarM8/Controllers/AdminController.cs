@@ -502,5 +502,48 @@ namespace APiConsumer.Controllers
             await _materialCategoriesApi.DeleteMaterialCategoryAsync(id);
             return RedirectToAction("MaterialCategory");
         }
+        // ---------------- Products CRUD ----------------
+        public async Task<IActionResult> Products()
+        {
+            var prod = await _productsApi.GetProductsAsync();
+            return View("Products/Index", prod);
+        }
+        public async Task<IActionResult> ProductsCreate()
+        {
+            ViewBag.Categories = await _categoriesApi.GetCategoriesAsync();
+            return View("Products/Create");
+        }
+        [HttpPost]
+        public async Task<IActionResult> ProductsCreate(PRODUCTS product)
+        {
+            await _productsApi.CreateProductAsync(product);
+            var prod = await _productsApi.GetProductsAsync();
+            return View("Products/Index", prod);
+        }
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var product = await _productsApi.GetProductAsync(id);
+            if (product == null) return NotFound();
+
+            return View(product);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(PRODUCTS product)
+        {
+            if (!ModelState.IsValid)
+                return View(product);
+
+            await _productsApi.UpdateProductAsync(product);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _productsApi.DeleteProductAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

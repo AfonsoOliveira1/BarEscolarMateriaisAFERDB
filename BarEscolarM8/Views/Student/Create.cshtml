@@ -1,0 +1,67 @@
+﻿@model IEnumerable<APiConsumer.Models.PRODUCTS>
+
+@{
+    ViewData["Title"] = "Bar Escolar";
+}
+
+<h1 class="bar-title">Bar Escolar — @ViewBag.User.FullName</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Preço</th>
+            <th>Stock</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prod in Model)
+        {
+            <tr>
+                <td>@prod.name</td>
+                <td>@prod.price</td>
+                <td>@prod.stock</td>
+                <td>@prod.description</td>
+                <td>@prod.category.Name</td>
+                <td>
+                    @{
+                        var userOrders = ViewBag.MarkedMenuIds as List<int>;
+                        bool alreadyBought = userOrders != null && userOrders.Contains(prod.id);
+                    }
+                    @if (prod.stock == 0)
+                    {
+                        <button class="btn btn-secondary btn-sm" disabled>Sem Stock</button>
+                    }
+                    else if (alreadyBought)
+                    {
+                        <button class="btn btn-warning btn-sm" disabled>Comprado</button>
+                    }
+                    else
+                    {
+                        <a asp-action="Comprar"
+                           asp-route-prodid="@prod.id"
+                           class="btn btn-success btn-sm">
+                            Comprar
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr class="bar-divider" />
+
+<div id="productList" class="bar-product-list">
+    @await Html.PartialAsync("_ProductList", Model)
+</div>
+
+<a asp-action="Index"
+   asp-route-id="@ViewBag.User.ID"
+   class="btn btn-primary mt-3">
+    Voltar ao Bar da Escola
+</a>
+}

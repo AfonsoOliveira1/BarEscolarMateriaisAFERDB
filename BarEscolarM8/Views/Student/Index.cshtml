@@ -1,0 +1,90 @@
+﻿@model List<APiConsumer.Models.MENUWEEK>
+
+@{
+    ViewData["Title"] = "Aluno";
+    var selectedOption = ViewBag.SelectedOption ?? "A";
+}
+
+<h1 class="page-title">Bem-vindo,</h1>
+
+<!-- Top Buttons -->
+<div class="top-buttons">
+    <center>
+    <a asp-action="Historico" class="btn btn-primary">Histórico</a>
+    <a asp-action="MenusMarcados"  class="btn btn-primary">Menus Marcados</a>
+    <a asp-action="Bar" class="btn btn-primary">Bar da Escola</a>
+    </center>
+</div>
+
+<h2>Menus da Semana</h2>
+
+<!-- Vegan / Não-Vegan Tabs -->
+<div class="menu-tabs">
+    <a asp-action="Index"
+       asp-route-option="A"
+       class="@(selectedOption == "A" ? "tab-active" : "")">
+        Não-Vegan
+    </a>
+
+    <a asp-action="Index"
+       asp-route-option="B"
+       class="@(selectedOption == "B" ? "tab-active" : "")">
+        Vegan
+    </a>
+</div>
+
+<!-- Week Cards -->
+@foreach (var week in Model)
+{
+    <div class="card mb-4 shadow-sm p-3">
+        <h4>Semana começando em: @week.weekstart</h4>
+
+        <table class="table cafeteria-table table-striped mt-2">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Prato Principal</th>
+                    <th>Sopa</th>
+                    <th>Sobremesa</th>
+                    <th>Notas</th>
+                    <th>Tipo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var menuDay in week.menudays)
+                {
+                    <tr>
+                        <td>@menuDay.date</td>
+                        <td>@menuDay.maindish</td>
+                        <td>@menuDay.soup</td>
+                        <td>@menuDay.dessert</td>
+                        <td>@menuDay.notes</td>
+                        <td>@(menuDay.option == "A" ? "Não-Vegan" : "Vegan")</td>
+                        <td>
+                            @{
+                                var marked = ((List<int>)ViewBag.MarkedMenuIds).Contains(menuDay.id);
+                                var remaining = menuDay.maxseats - (((Dictionary<int, int>)ViewBag.RemainingSeats)
+                                .GetValueOrDefault(menuDay.id, 0));
+                            }
+
+                            @if (marked)
+                            {
+                                <button class="btn btn-secondary btn-sm" disabled>Marcado ✓</button>
+                            }
+                            else
+                            {
+                                <a asp-action="Marcar"
+                                   asp-route-id="@ViewBag.User.ID"
+                                   asp-route-menuId="@menuDay.id"
+                                   class="btn btn-success btn-sm">
+                                    Marcar (@remaining)
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
