@@ -288,102 +288,65 @@ namespace APiConsumer.Controllers
             return RedirectToAction("MenuWeeks");
         }
         // ---------------- CATEGORY CRUD ----------------
-        public IActionResult Categories()
+        public async Task<IActionResult> Categories()
         {
             var categories = await _categoriesApi.GetCategoriesAsync();
             return View("Category/Index", categories);
         }
 
-        public IActionResult CreateCategory(string id)
+        public IActionResult CreateCategory()
         {
-            var userName = HttpContext.Session.GetString("UserName");
-            var userRole = HttpContext.Session.GetString("UserRole");
-            var userId = HttpContext.Session.GetString("UserID");
-            var user = _userStore.FindById(id);
-            if (user == null)
-                return NotFound("Usuário não encontrado.");
-            ViewBag.User = user;
-            if (userName == null || userRole != "Admin" || userId != user.ID)
-                return RedirectToAction("Login", "Login");
-
-            return View();
+            return View("Category/CreateCategory");
         }
 
         [HttpPost]
-        public IActionResult CreateCategory(Category category, IFormFile imageFile, string id)
+        public async Task<IActionResult> CreateCategory(string name, string desc)
         {
-            if (imageFile != null && imageFile.Length > 0)
+            var categories = await _categoriesApi.GetCategoriesAsync();
+
+            var category = new CATEGORIES
             {
-                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "Images");
-                Directory.CreateDirectory(folderPath);
-                var filePath = Path.Combine(folderPath, imageFile.FileName);
-                if (filePath.EndsWith(".png") || filePath.EndsWith(".jpg") || filePath.EndsWith(".gif")
-                    || filePath.EndsWith("jpeg"))
-                {
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        imageFile.CopyTo(stream);
-                    }
-                    category.ImagePath = imageFile.FileName;
-                }
-                else
-                {
-                    return NotFound();
-                }
-            }
-            category.Id = _categoryStore.GetAll().Any() ? _categoryStore.GetAll().Max(c => c.Id) + 1 : 1;
-            _categoryStore.Add(category);
-            return RedirectToAction("Categories", new { id = id });
-        }
+                name = name,
+                description = desc
+            };
 
-        public IActionResult EditCategory(int catid, string id)
-        {
-            var userName = HttpContext.Session.GetString("UserName");
-            var userRole = HttpContext.Session.GetString("UserRole");
-            var userId = HttpContext.Session.GetString("UserID");
-            var user = _userStore.FindById(id);
-            ViewBag.User = user;
-            if (user == null)
-                return NotFound("Usuário não encontrado.");
-            if (userName == null || userRole != "Admin" || userId != user.ID)
-                return RedirectToAction("Login", "Login");
+            var createcat = await _categoriesApi.CreateCategoryAsync(category);
 
-            var category = _categoryStore.FindById(catid);
-            if (category == null) return NotFound();
-            return View(category);
-        }
-
-        [HttpPost]
-        public IActionResult EditCategory(Category category, IFormFile imageFile, string userid)
-        {
-            if (imageFile != null && imageFile.Length > 0)
+            if (createcat == null)
             {
-                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "Images");
-                Directory.CreateDirectory(folderPath);
-                var filePath = Path.Combine(folderPath, imageFile.FileName);
-                if (filePath.EndsWith(".png") || filePath.EndsWith(".jpg") || filePath.EndsWith(".gif")
-                    || filePath.EndsWith("jpeg"))
-                {
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        imageFile.CopyTo(stream);
-                    }
-                    category.ImagePath = imageFile.FileName;
-                }
-                else
-                {
-                    return NotFound();
-                }
+                ModelState.AddModelError("", "Falha ao criar a semana.");
+                return View("Category/CreateCategory");
             }
-            _categoryStore.Update(category);
-            return RedirectToAction("Categories", new { id = userid });
+            TempData["Success"] = "Semana criada com sucesso!";
+            return View("Category/Index", categories);
+        }
+
+        public async Task<IActionResult> EditCategory(int id)
+        {
+            var cat = await _categoriesApi.GetCategoryAsync(id);
+            if (cat == null) return NotFound();
+            var categories = await _categoriesApi.GetCategoriesAsync();
+            return View("Category/Index", categories);
         }
 
         [HttpPost]
-        public IActionResult DeleteCategory(int catid, string id)
+        public async Task<IActionResult> EditCategory(int id, string name, string desc)
         {
-            _categoryStore.Delete(catid);
-            return RedirectToAction("Categories", new { id = id });
+            var cat = await _categoriesApi.GetCategoryAsync(id);
+            if (cat == null) return NotFound();
+
+            cat.name = name;
+            cat.description = desc;
+            var categories = await _categoriesApi.GetCategoriesAsync();
+            return View("Category/Index", categories);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteCategory(int catid)
+        {
+            _categoriesApi.DeleteCategoryAsync(catid);
+            var categories = await _categoriesApi.GetCategoriesAsync();
+            return View("Category/Index", categories);
         }
         // ---------------- Material ----------------
         public async Task<IActionResult> Material()

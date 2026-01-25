@@ -1,14 +1,15 @@
-﻿@model IEnumerable<BarEscolar.Models.Category>
+﻿@model List<APiConsumer.Models.CATEGORIES>
 
 <h2>Categorias</h2>
 
-<a class="btn btn-success" asp-action="CreateCategory" asp-route-id="@ViewBag.User.ID">Nova Categoria</a>
+<a class="btn btn-success" asp-action="CreateCategory">Nova Categoria</a>
 
 <table class="table mt-3">
     <thead>
         <tr>
-            <th>Imagem</th>
+            <th>ID</th>
             <th>Nome</th>
+            <th>Descrição</th>
             <th></th>
         </tr>
     </thead>
@@ -16,25 +17,14 @@
         @foreach (var c in Model)
         {
             <tr>
+                <td>@c.id</td>
+                <td>@c.name</td>
+                <td>@c.description</td>
                 <td>
-                    @if (!string.IsNullOrEmpty(c.ImagePath))
-                    {
-                        <center>
-                            <img src="/Images/@c.ImagePath" style="width:70px" />
-                        </center>
-                    }
-                    else
-                    {
-                        <span>Sem Imagem</span>
-                    }
-                </td>
-                <td>@c.Name</td>
-                <td>
-                    <a asp-action="EditCategory" asp-route-catid="@c.Id" asp-route-id="@ViewBag.User.ID" class="btn btn-sm btn-warning">Editar</a>
+                    <a asp-action="EditCategory" asp-route-catid="@c.id" class="btn btn-sm btn-warning">Editar</a>
 
                     <form asp-action="DeleteCategory"
-                          asp-route-catid="@c.Id"
-						  asp-route-id="@ViewBag.User.ID" 
+                          asp-route-catid="@c.id"
                           method="post"
                           style="display:inline-block">
                         <button type="submit"
@@ -49,6 +39,6 @@
     </tbody>
 </table>
 
-<a asp-action="Index" asp-controller="Admin" asp-route-id="@ViewBag.User.ID" class="btn btn-secondary mt-4">
+<a asp-action="Index" asp-controller="Admin" class="btn btn-secondary mt-4">
     Voltar ao Dashboard
 </a>
