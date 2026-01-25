@@ -1,0 +1,18 @@
+﻿@model APiConsumer.Models.MATERIALCATEGORIES
+
+<form asp-action="CreateMaterialCategory" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label>Nome</label>
+        <input asp-for="Name" class="form-control" required />
+    </div>
+
+    <div class="mb-3">
+        <label>Descrição</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+</form>

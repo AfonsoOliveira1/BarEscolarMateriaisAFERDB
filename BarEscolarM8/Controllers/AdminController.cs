@@ -4,10 +4,16 @@ using BarEscolarM8.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.Metrics;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Model;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace APiConsumer.Controllers
 {
@@ -20,14 +26,15 @@ namespace APiConsumer.Controllers
         private readonly CategoryApiClient _categoriesApi;
         private readonly UsersApiClient _usersApi;
         private readonly MaterialsApiClient _materialsApi;
-
+        private readonly MaterialCategoriesApiClient _materialCategoriesApi;
         public AdminController(
             MenuWeeksApiClient menuWeeksApi,
             MenuDaysApiClient menuDaysApi,
             ProductsApiClient productsApi,
             CategoryApiClient categoriesApi,
             UsersApiClient usersApi,
-            MaterialsApiClient materialsApi)
+            MaterialsApiClient materialsApi,
+            MaterialCategoriesApiClient materialCategoriesApi)
         {
             _menuWeeksApi = menuWeeksApi;
             _menuDaysApi = menuDaysApi;
@@ -35,6 +42,7 @@ namespace APiConsumer.Controllers
             _categoriesApi = categoriesApi;
             _usersApi = usersApi;
             _materialsApi = materialsApi;
+            _materialCategoriesApi = materialCategoriesApi;
         }
 
         // ---------------- DASHBOARD ----------------
@@ -294,72 +302,205 @@ namespace APiConsumer.Controllers
             return View("Category/Index", categories);
         }
 
+        [HttpGet]
         public IActionResult CreateCategory()
         {
             return View("Category/CreateCategory");
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCategory(string name, string desc)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateCategory(CATEGORIES model)
         {
-            var categories = await _categoriesApi.GetCategoriesAsync();
+            Console.WriteLine("✅ POST Admin/CreateCategory HIT");
 
-            var category = new CATEGORIES
+            var success = await _categoriesApi.CreateCategoryAsync(model);
+
+            if (!success)
             {
-                name = name,
-                description = desc
-            };
-
-            var createcat = await _categoriesApi.CreateCategoryAsync(category);
-
-            if (createcat == null)
-            {
-                ModelState.AddModelError("", "Falha ao criar a semana.");
-                return View("Category/CreateCategory");
+                ModelState.AddModelError("", "Erro ao criar categoria");
+                return View("Category/CreateCategory",model);
             }
-            TempData["Success"] = "Semana criada com sucesso!";
-            return View("Category/Index", categories);
+
+            return RedirectToAction("Categories");
         }
 
-        public async Task<IActionResult> EditCategory(int id)
+        [HttpGet]
+        public async Task<IActionResult> EditCategory(int catid)
         {
-            var cat = await _categoriesApi.GetCategoryAsync(id);
-            if (cat == null) return NotFound();
-            var categories = await _categoriesApi.GetCategoriesAsync();
-            return View("Category/Index", categories);
+            var category = await _categoriesApi.GetCategoryAsync(catid);
+            if (category == null)
+                return NotFound();
+
+            return View("Category/EditCategory", category);
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditCategory(int id, string name, string desc)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCategory(CATEGORIES model)
         {
-            var cat = await _categoriesApi.GetCategoryAsync(id);
-            if (cat == null) return NotFound();
+            ModelState.Remove("products");
 
-            cat.name = name;
-            cat.description = desc;
-            var categories = await _categoriesApi.GetCategoriesAsync();
-            return View("Category/Index", categories);
+            if (!ModelState.IsValid)
+            {
+                return View("Category/EditCategory", model);
+            }
+
+            try
+            {
+                var success = await _categoriesApi.UpdateCategoryAsync(model);
+
+                if (success)
+                {
+                    TempData["Success"] = "Categoria atualizada com sucesso!";
+                    return RedirectToAction("Categories");
+                }
+
+                ModelState.AddModelError("", "O servidor da API rejeitou a atualização.");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Erro técnico: {ex.Message}");
+            }
+
+            return View("Category/EditCategory", model);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteCategory(int catid)
         {
-            _categoriesApi.DeleteCategoryAsync(catid);
-            var categories = await _categoriesApi.GetCategoriesAsync();
-            return View("Category/Index", categories);
+            var success = await _categoriesApi.DeleteCategoryAsync(catid);
+            if (!success)
+            {
+                TempData["Error"] = "Não foi possível apagar a categoria.";
+                return RedirectToAction("Categories");
+            }
+
+            TempData["Success"] = "Categoria apagada com sucesso!";
+            return RedirectToAction("Categories");
         }
-        // ---------------- Material ----------------
+        // ---------------- MATERIALS ----------------
+
         public async Task<IActionResult> Material()
         {
-            var material = await _materialsApi.GetMaterialsAsync();
-            return View("Material/Index", material);
+            var materials = await _materialsApi.GetMaterialsAsync();
+            return View("Material/Index", materials);
         }
 
-        // ---------------- Materials Category ----------------
+        [HttpGet]
+        public async Task<IActionResult> CreateMaterial()
+        {
+            ViewBag.Categories = await _materialCategoriesApi.GetMaterialCategoriesAsync();
+            return View("Material/Create");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateMaterial(MATERIALS model)
+        {
+            // Fix: Ensure Id is 0 so the DB generates a new one
+            model.id = 0;
+            ModelState.Remove("id");
+
+            if (await _materialsApi.CreateMaterialAsync(model))
+                return RedirectToAction("Material");
+
+            ViewBag.Categories = await _materialCategoriesApi.GetMaterialCategoriesAsync();
+            return View("Material/Create", model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditMaterial(int id)
+        {
+            var material = await _materialsApi.GetMaterialAsync(id);
+            if (material == null) return NotFound();
+
+            ViewBag.Categories = await _materialCategoriesApi.GetMaterialCategoriesAsync();
+            return View("Material/Edit", material);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditMaterial(MATERIALS model)
+        {
+            if (await _materialsApi.UpdateMaterialAsync(model))
+                return RedirectToAction("Material");
+
+            ViewBag.Categories = await _materialCategoriesApi.GetMaterialCategoriesAsync();
+            return View("Material/Edit", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteMaterial(int id)
+        {
+            await _materialsApi.DeleteMaterialAsync(id);
+            return RedirectToAction("Material");
+        }
+
+        // ---------------- MATERIAL CATEGORIES ----------------
+
         public async Task<IActionResult> MaterialCategory()
         {
-            var materialcategory = await _menuWeeksApi.GetMenuWeeksAsync();
-            return View("MenuWeeks/Index", materialcategory);
+            var categories = await _materialCategoriesApi.GetMaterialCategoriesAsync();
+            return View("MaterialCategory/Index", categories);
+        }
+
+        [HttpGet]
+        public IActionResult CreateMaterialCategory() => View("MaterialCategory/Create");
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateMaterialCategory(MATERIALCATEGORIES model)
+        {
+            // 1. Force Id to 0 so the Database Identity takes over
+            model.Id = 0;
+
+            // 2. Remove navigation properties/Ids from validation to prevent "Refresh"
+            ModelState.Remove("Materials");
+            ModelState.Remove("Id");
+
+            if (!ModelState.IsValid)
+            {
+                return View("MaterialCategory/Create", model);
+            }
+
+            var success = await _materialCategoriesApi.CreateMaterialCategoryAsync(model);
+            if (success)
+            {
+                return RedirectToAction("MaterialCategory");
+            }
+
+            // If it still fails, the DB table likely isn't IDENTITY yet
+            ModelState.AddModelError("", "API Error: The database rejected the save. Ensure the table 'id' column is set to IDENTITY.");
+            return View("MaterialCategory/Create", model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditMaterialCategory(int id)
+        {
+            var category = await _materialCategoriesApi.GetMaterialCategoryAsync(id);
+            if (category == null) return NotFound();
+            return View("MaterialCategory/Edit", category);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditMaterialCategory(MATERIALCATEGORIES model)
+        {
+            if (await _materialCategoriesApi.UpdateMaterialCategoryAsync(model))
+                return RedirectToAction("MaterialCategory");
+
+            return View("MaterialCategory/Edit", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteMaterialCategory(int id)
+        {
+            await _materialCategoriesApi.DeleteMaterialCategoryAsync(id);
+            return RedirectToAction("MaterialCategory");
         }
     }
 }

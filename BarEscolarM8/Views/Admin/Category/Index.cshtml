@@ -17,14 +17,14 @@
         @foreach (var c in Model)
         {
             <tr>
-                <td>@c.id</td>
-                <td>@c.name</td>
-                <td>@c.description</td>
+                <td>@c.Id</td>
+                <td>@c.Name</td>
+                <td>@c.Description</td>
                 <td>
-                    <a asp-action="EditCategory" asp-route-catid="@c.id" class="btn btn-sm btn-warning">Editar</a>
+                    <a asp-action="EditCategory" asp-route-catid="@c.Id" class="btn btn-sm btn-warning">Editar</a>
 
                     <form asp-action="DeleteCategory"
-                          asp-route-catid="@c.id"
+                          asp-route-catid="@c.Id"
                           method="post"
                           style="display:inline-block">
                         <button type="submit"

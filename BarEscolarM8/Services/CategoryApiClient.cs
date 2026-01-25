@@ -23,22 +23,37 @@ namespace APiConsumer.Services
         // Get a single category by ID
         public async Task<CATEGORIES?> GetCategoryAsync(int id)
         {
-            return await _httpClient.GetFromJsonAsync<CATEGORIES>($"api/Category/{id}");
+            var response = await _httpClient.GetAsync($"api/Category/{id}");
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return null;
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<CATEGORIES>();
         }
 
         // Create a new category
         public async Task<bool> CreateCategoryAsync(CATEGORIES category)
         {
             var response = await _httpClient.PostAsJsonAsync("api/Category", category);
-            return response.IsSuccessStatusCode;
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception(error);
+            }
+
+            return true;
         }
 
         // Update an existing category
         public async Task<bool> UpdateCategoryAsync(CATEGORIES category)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/Category/{category.id}", category);
+            var response = await _httpClient.PutAsJsonAsync($"api/Category/{category.Id}", category);
             return response.IsSuccessStatusCode;
         }
+
 
         // Delete a category by ID
         public async Task<bool> DeleteCategoryAsync(int id)

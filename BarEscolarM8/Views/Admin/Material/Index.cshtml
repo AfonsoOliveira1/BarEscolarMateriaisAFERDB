@@ -1,39 +1,42 @@
 ﻿@model List<APiConsumer.Models.MATERIALS>
 
-<h2>Products</h2>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Materiais (Produtos)</h2>
+        <a asp-action="CreateMaterial" class="btn btn-primary">Novo Material</a>
+    </div>
 
-<a asp-action="Create" class="btn btn-primary">Create Material</a>
-
-<table class="table mt-3">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Description</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var p in Model)
-        {
+    <table class="table table-hover mt-3">
+        <thead class="table-dark">
             <tr>
-                <td>@p.name</td>
-                <td>
-                    @{
-                       @p.categoryid
-                    }
-                </td>
-                <td>@p.price €</td>
-                <td>@p.stock</td>
-                <td>@p.description</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@p.id" class="btn btn-sm btn-warning">
-                        Edit
-                    </a>
-                </td>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Stock</th>
+                <th>Categoria (ID)</th>
+                <th>Ações</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td>@p.name</td>
+                    <td>@p.price.ToString("F2") €</td>
+                    <td>@(p.stock ?? 0)</td>
+                    <td>@p.categoryid</td>
+                    <td>
+                        <a asp-action="EditMaterial" asp-route-id="@p.id" class="btn btn-sm btn-warning">Editar</a>
+
+                        <form asp-action="DeleteMaterial" asp-route-id="@p.id" method="post" style="display:inline-block">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Tem a certeza que quer apagar o material @p.name?');">
+                                Apagar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
