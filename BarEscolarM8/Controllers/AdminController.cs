@@ -19,19 +19,22 @@ namespace APiConsumer.Controllers
         private readonly ProductsApiClient _productsApi;
         private readonly CategoryApiClient _categoriesApi;
         private readonly UsersApiClient _usersApi;
+        private readonly MaterialsApiClient _materialsApi;
 
         public AdminController(
             MenuWeeksApiClient menuWeeksApi,
             MenuDaysApiClient menuDaysApi,
             ProductsApiClient productsApi,
             CategoryApiClient categoriesApi,
-            UsersApiClient usersApi)
+            UsersApiClient usersApi,
+            MaterialsApiClient materialsApi)
         {
             _menuWeeksApi = menuWeeksApi;
             _menuDaysApi = menuDaysApi;
             _productsApi = productsApi;
             _categoriesApi = categoriesApi;
             _usersApi = usersApi;
+            _materialsApi = materialsApi;
         }
 
         // ---------------- DASHBOARD ----------------
@@ -40,7 +43,7 @@ namespace APiConsumer.Controllers
             ViewBag.Weeks = await _menuWeeksApi.GetMenuWeeksAsync();
             ViewBag.Products = await _productsApi.GetProductsAsync();
             ViewBag.Categories = await _categoriesApi.GetCategoriesAsync();
-
+            ViewBag.Materials = await _materialsApi.GetMaterialsAsync();
             return View();
         }
 
