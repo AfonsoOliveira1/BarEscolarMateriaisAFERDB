@@ -11,7 +11,7 @@
 //            _httpClient = httpClientFactory.CreateClient("BarEscolaApi");
 //        }
 
-//        public async Task<List<MATERIALCATEGORIES>> GetMaterialCategoriesAsync()
+//        public async Task<List<MATERIALSC>> GetMaterialCategoriesAsync()
 //        {
 //            var result = await _httpClient.GetFromJsonAsync<List<MATERIALCATEGORIES>>("api/MATERIALCATEGORIES");
 //            return result ?? new List<MATERIALCATEGORIES>();

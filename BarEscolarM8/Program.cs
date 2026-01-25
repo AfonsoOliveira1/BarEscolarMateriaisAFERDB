@@ -36,6 +36,7 @@ builder.Services.AddScoped<UsersApiClient>();
 builder.Services.AddScoped<OrdersApiClient>();
 builder.Services.AddScoped<OrderItemsApiClient>();
 builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddScoped<MaterialsApiClient>();
 
 
 builder.Services

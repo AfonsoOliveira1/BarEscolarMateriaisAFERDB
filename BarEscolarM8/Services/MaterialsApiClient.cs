@@ -13,13 +13,27 @@ namespace APiConsumer.Services
 
         public async Task<List<MATERIALS>> GetMaterialsAsync()
         {
-            var result = await _httpClient.GetFromJsonAsync<List<MATERIALS>>("api/MATERIALS");
-            return result ?? new List<MATERIALS>();
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<List<MATERIALS>>("api/MATERIALS");
+                return result ?? new List<MATERIALS>();
+            }
+            catch
+            {
+                return new List<MATERIALS>();
+            }
         }
 
         public async Task<MATERIALS?> GetMaterialAsync(int id)
         {
-            return await _httpClient.GetFromJsonAsync<MATERIALS>($"api/MATERIALS/{id}");
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<MATERIALS>($"api/MATERIALS/{id}");
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task<bool> CreateMaterialAsync(MATERIALS material)

@@ -1,0 +1,54 @@
+﻿@model IEnumerable<BarEscolar.Models.Category>
+
+<h2>Categorias</h2>
+
+<a class="btn btn-success" asp-action="CreateCategory" asp-route-id="@ViewBag.User.ID">Nova Categoria</a>
+
+<table class="table mt-3">
+    <thead>
+        <tr>
+            <th>Imagem</th>
+            <th>Nome</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(c.ImagePath))
+                    {
+                        <center>
+                            <img src="/Images/@c.ImagePath" style="width:70px" />
+                        </center>
+                    }
+                    else
+                    {
+                        <span>Sem Imagem</span>
+                    }
+                </td>
+                <td>@c.Name</td>
+                <td>
+                    <a asp-action="EditCategory" asp-route-catid="@c.Id" asp-route-id="@ViewBag.User.ID" class="btn btn-sm btn-warning">Editar</a>
+
+                    <form asp-action="DeleteCategory"
+                          asp-route-catid="@c.Id"
+						  asp-route-id="@ViewBag.User.ID" 
+                          method="post"
+                          style="display:inline-block">
+                        <button type="submit"
+                                class="btn btn-sm btn-danger"
+                                onclick="return confirm('Tem a certeza que quer apagar esta categoria?');">
+                            Apagar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" asp-controller="Admin" asp-route-id="@ViewBag.User.ID" class="btn btn-secondary mt-4">
+    Voltar ao Dashboard
+</a>

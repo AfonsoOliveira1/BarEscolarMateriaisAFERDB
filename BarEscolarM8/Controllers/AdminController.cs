@@ -287,6 +287,116 @@ namespace APiConsumer.Controllers
 
             return RedirectToAction("MenuWeeks");
         }
+        // ---------------- CATEGORY CRUD ----------------
+        public IActionResult Categories()
+        {
+            var categories = await _categoriesApi.GetCategoriesAsync();
+            return View("Category/Index", categories);
+        }
 
+        public IActionResult CreateCategory(string id)
+        {
+            var userName = HttpContext.Session.GetString("UserName");
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var userId = HttpContext.Session.GetString("UserID");
+            var user = _userStore.FindById(id);
+            if (user == null)
+                return NotFound("Usuário não encontrado.");
+            ViewBag.User = user;
+            if (userName == null || userRole != "Admin" || userId != user.ID)
+                return RedirectToAction("Login", "Login");
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult CreateCategory(Category category, IFormFile imageFile, string id)
+        {
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "Images");
+                Directory.CreateDirectory(folderPath);
+                var filePath = Path.Combine(folderPath, imageFile.FileName);
+                if (filePath.EndsWith(".png") || filePath.EndsWith(".jpg") || filePath.EndsWith(".gif")
+                    || filePath.EndsWith("jpeg"))
+                {
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        imageFile.CopyTo(stream);
+                    }
+                    category.ImagePath = imageFile.FileName;
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            category.Id = _categoryStore.GetAll().Any() ? _categoryStore.GetAll().Max(c => c.Id) + 1 : 1;
+            _categoryStore.Add(category);
+            return RedirectToAction("Categories", new { id = id });
+        }
+
+        public IActionResult EditCategory(int catid, string id)
+        {
+            var userName = HttpContext.Session.GetString("UserName");
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var userId = HttpContext.Session.GetString("UserID");
+            var user = _userStore.FindById(id);
+            ViewBag.User = user;
+            if (user == null)
+                return NotFound("Usuário não encontrado.");
+            if (userName == null || userRole != "Admin" || userId != user.ID)
+                return RedirectToAction("Login", "Login");
+
+            var category = _categoryStore.FindById(catid);
+            if (category == null) return NotFound();
+            return View(category);
+        }
+
+        [HttpPost]
+        public IActionResult EditCategory(Category category, IFormFile imageFile, string userid)
+        {
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "Images");
+                Directory.CreateDirectory(folderPath);
+                var filePath = Path.Combine(folderPath, imageFile.FileName);
+                if (filePath.EndsWith(".png") || filePath.EndsWith(".jpg") || filePath.EndsWith(".gif")
+                    || filePath.EndsWith("jpeg"))
+                {
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        imageFile.CopyTo(stream);
+                    }
+                    category.ImagePath = imageFile.FileName;
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            _categoryStore.Update(category);
+            return RedirectToAction("Categories", new { id = userid });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteCategory(int catid, string id)
+        {
+            _categoryStore.Delete(catid);
+            return RedirectToAction("Categories", new { id = id });
+        }
+        // ---------------- Material ----------------
+        public async Task<IActionResult> Material()
+        {
+            var material = await _materialsApi.GetMaterialsAsync();
+            return View("Material/Index", material);
+        }
+
+        // ---------------- Materials Category ----------------
+        public async Task<IActionResult> MaterialCategory()
+        {
+            var materialcategory = await _menuWeeksApi.GetMenuWeeksAsync();
+            return View("MenuWeeks/Index", materialcategory);
+        }
     }
 }
