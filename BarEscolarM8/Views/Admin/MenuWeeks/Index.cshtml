@@ -21,11 +21,11 @@
         @foreach (var week in Model)
         {
             <tr>
-                <td>@week.id</td>
+                <td>@week.Id</td>
                 <td>@week.weekstart</td>
                 <td>
-                    <a asp-action="EditWeek" asp-route-id="@week.id" class="btn btn-sm btn-warning">Edit</a>
-                    <form asp-action="DeleteWeek" asp-route-id="@week.id" method="post" style="display:inline">
+                    <a asp-action="EditWeek" asp-route-id="@week.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <form asp-action="DeleteWeek" asp-route-id="@week.Id" method="post" style="display:inline">
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this week?')">Delete</button>
                     </form>
                 </td>

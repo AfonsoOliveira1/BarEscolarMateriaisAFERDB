@@ -1,0 +1,47 @@
+﻿@model APiConsumer.Models.MENUWEEK
+@{
+    ViewData["Title"] = "Edit Week";
+
+    var weekDays = ViewBag.WeekDays as List<APiConsumer.Models.MENUDAY> ?? new List<APiConsumer.Models.MENUDAY>();
+}
+
+<h2>Edit Week: @Model.weekstart</h2>
+
+<form asp-action="EditWeek" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Option</th>
+                <th>Main Dish</th>
+                <th>Soup</th>
+                <th>Dessert</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < weekDays.Count; i++)
+            {
+                <tr>
+                    <td>@weekDays[i].date?.ToString("yyyy-MM-dd")</td>
+                    <td>@weekDays[i].option</td>
+                    <td>
+                        <input type="text" name="weekDays[@i].maindish" value="@weekDays[i].maindish" class="form-control" />
+                        <input type="hidden" name="weekDays[@i].id" value="@weekDays[i].id" />
+                        <input type="hidden" name="weekDays[@i].menuweekid" value="@weekDays[i].menuweekid" />
+                        <input type="hidden" name="weekDays[@i].dateString" value="@weekDays[i].date?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="weekDays[@i].option" value="@weekDays[i].option" />
+                    </td>
+                    <td><input type="text" name="weekDays[@i].soup" value="@weekDays[i].soup" class="form-control" /></td>
+                    <td><input type="text" name="weekDays[@i].dessert" value="@weekDays[i].dessert" class="form-control" /></td>
+                    <td><input type="text" name="weekDays[@i].notes" value="@weekDays[i].notes" class="form-control" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a asp-action="MenuWeeks" class="btn btn-secondary">Cancel</a>
+</form>

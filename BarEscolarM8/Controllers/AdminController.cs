@@ -4,6 +4,10 @@ using BarEscolarM8.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace APiConsumer.Controllers
 {
@@ -40,110 +44,16 @@ namespace APiConsumer.Controllers
             return View();
         }
 
-        // ---------------- USERS ----------------
-        public async Task<IActionResult> Users()
-        {
-            var users = await _usersApi.GetUsersAsync();
-            return View("Users/IndexUsers", users);
-        }
-
-        public IActionResult CreateUser()
-        {
-            return View("Users/CreateUser");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateUser(string fullName,string email,string username,string password, int role)
-        {
-            var hasher = new PasswordHasher<USERS>();
-
-            var newUser = new USERS
-            {
-                id = Guid.NewGuid().ToString(),
-                fullname = fullName,
-                email = email,
-                username = username,
-                role = role
-            };
-
-            newUser.passwordhash = hasher.HashPassword(newUser, password);
-
-            var (success, error) = await _usersApi.CreateUserAsync(newUser);
-
-            if (!success)
-            {
-                ModelState.AddModelError("", error ?? "Failed to create user");
-                return View("Users/CreateUser");
-            }
-
-            return RedirectToAction("Users");
-        }
-        public async Task<IActionResult> EditUser(string id)
-        {
-            var user = await _usersApi.GetUserAsync(id);
-
-            if (user == null)
-                return NotFound();
-
-            return View("Users/EditUser", user);
-        }
-        [HttpPost]
-        public async Task<IActionResult> EditUser( string id, string fullName,string email,string username,string? password,int role)
-        {
-            var user = await _usersApi.GetUserAsync(id);
-            if (user == null)
-                return NotFound();
-
-            user.fullname = fullName;
-            user.email = email;
-            user.username = username;
-            user.role = role;
-
-            // only update password if provided
-            if (!string.IsNullOrWhiteSpace(password))
-            {
-                user.passwordhash = password;
-            }
-
-            var success = await _usersApi.UpdateUserAsync(user);
-
-            if (!success)
-            {
-                ModelState.AddModelError("", "Failed to update user");
-                return View("Users/EditUser", user);
-            }
-
-            return RedirectToAction("Users");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> DeleteUser(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-                return BadRequest();
-
-            var success = await _usersApi.DeleteUserAsync(id);
-
-            if (!success)
-            {
-                TempData["Error"] = "Failed to delete user.";
-            }
-
-            return RedirectToAction("Users");
-        }
-
-
         // ---------------- MENU WEEKS ----------------
         public async Task<IActionResult> MenuWeeks()
         {
-            // List all weeks
             var weeks = await _menuWeeksApi.GetMenuWeeksAsync();
-            return View("MenuWeeks", weeks); 
+            return View("MenuWeeks/Index", weeks);
         }
 
         public IActionResult CreateWeek()
         {
-            return View("MenuWeeks/Create",new CreateWeekViewModel { WeekStart = DateTime.Today });
+            return View("MenuWeeks/Create", new CreateWeekViewModel { WeekStart = DateTime.Today });
         }
 
         [HttpPost]
@@ -161,41 +71,93 @@ namespace APiConsumer.Controllers
                 weekstart = weekStart.ToString("yyyy-MM-dd")
             };
 
-            var success = await _menuWeeksApi.CreateMenuWeekAsync(week);
+            var createdWeek = await _menuWeeksApi.CreateMenuWeekAsync(week);
 
-            if (!success)
+            if (createdWeek == null)
             {
                 ModelState.AddModelError("", "Falha ao criar a semana.");
                 ViewBag.EnteredDate = weekStart.ToString("yyyy-MM-dd");
                 return View("MenuWeeks/Create");
             }
 
+            // Create menu days
+            for (int i = 0; i < 5; i++)
+            {
+                var dayDate = DateOnly.FromDateTime(weekStart.AddDays(i));
+
+                var veganDay = new MENUDAY
+                {
+                    menuweekid = createdWeek.Id,
+                    date = dayDate,
+                    option = "Vegan"
+                };
+                await _menuDaysApi.CreateMenuDayAsync(veganDay);
+
+                var nonVeganDay = new MENUDAY
+                {
+                    menuweekid = createdWeek.Id,
+                    date = dayDate,
+                    option = "Non-Vegan"
+                };
+                await _menuDaysApi.CreateMenuDayAsync(nonVeganDay);
+            }
+
             TempData["Success"] = "Semana criada com sucesso!";
-            return RedirectToAction("MenuWeeks"); 
+            return RedirectToAction("MenuWeeks");
         }
-
-
-
 
         public async Task<IActionResult> EditWeek(int id)
         {
             var week = await _menuWeeksApi.GetMenuWeekAsync(id);
             if (week == null) return NotFound();
 
-            return View(week); 
+            var allDays = await _menuDaysApi.GetMenuDaysAsync();
+            var weekDays = allDays
+                .Where(d => d.menuweekid == week.Id)
+                .OrderBy(d => d.date)
+                .ThenBy(d => d.option)
+                .ToList();
+
+            ViewBag.WeekDays = weekDays;
+            return View("MenuWeeks/Edit", week);
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditWeek(MENUWEEK week)
+        public async Task<IActionResult> EditWeek(int id, List<MENUDAY> weekDays)
         {
-            if (!ModelState.IsValid) return View(week);
-
-            var success = await _menuWeeksApi.UpdateMenuWeekAsync(week);
-
-            if (!success)
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("", "Failed to update menu week.");
-                return View(week);
+                var weekReload = await _menuWeeksApi.GetMenuWeekAsync(id);
+                ViewBag.WeekDays = weekDays ?? new List<MENUDAY>();
+                return View("MenuWeeks/Edit", weekReload);
+            }
+
+            var week = await _menuWeeksApi.GetMenuWeekAsync(id);
+            if (week == null) return NotFound();
+
+            // Update the week itself if needed
+            await _menuWeeksApi.UpdateMenuWeekAsync(week);
+
+            foreach (var day in weekDays)
+            {
+                // Parse date string from form back into DateOnly
+                if (day.date == null && !string.IsNullOrWhiteSpace(day.dateString))
+                {
+                    if (DateOnly.TryParse(day.dateString, out var parsedDate))
+                    {
+                        day.date = parsedDate;
+                    }
+                }
+
+                // If it’s a new day
+                if (day.id == 0)
+                {
+                    await _menuDaysApi.CreateMenuDayAsync(day);
+                }
+                else
+                {
+                    await _menuDaysApi.UpdateMenuDayAsync(day);
+                }
             }
 
             return RedirectToAction("MenuWeeks");
@@ -204,8 +166,21 @@ namespace APiConsumer.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteWeek(int id)
         {
-            var success = await _menuWeeksApi.DeleteMenuWeekAsync(id);
+            var week = await _menuWeeksApi.GetMenuWeekAsync(id);
+            if (week == null)
+            {
+                TempData["Error"] = "Week not found.";
+                return RedirectToAction("MenuWeeks");
+            }
 
+            // Delete all days first
+            foreach (var day in week.menudays ?? new List<MENUDAY>())
+            {
+                await _menuDaysApi.DeleteMenuDayAsync(day.id);
+            }
+
+            // Now delete the week
+            var success = await _menuWeeksApi.DeleteMenuWeekAsync(id);
             if (!success) TempData["Error"] = "Failed to delete week.";
 
             return RedirectToAction("MenuWeeks");
@@ -218,9 +193,8 @@ namespace APiConsumer.Controllers
             var day = new MENUDAY
             {
                 menuweekid = weekId,
-                date = DateOnly.FromDateTime(DateTime.Today).ToString()
+                date = DateOnly.FromDateTime(DateTime.Today)
             };
-
             return View(day);
         }
 
@@ -229,21 +203,6 @@ namespace APiConsumer.Controllers
         {
             await _menuDaysApi.CreateMenuDayAsync(day);
             return RedirectToAction("MenuWeeks");
-        }
-
-        // ---------------- PRODUCTS ----------------
-        public async Task<IActionResult> Products()
-        {
-            ViewBag.Categories = await _categoriesApi.GetCategoriesAsync();
-            var products = await _productsApi.GetProductsAsync();
-            return View(products);
-        }
-
-        // ---------------- CATEGORIES ----------------
-        public async Task<IActionResult> Categories()
-        {
-            var categories = await _categoriesApi.GetCategoriesAsync();
-            return View(categories);
         }
     }
 }

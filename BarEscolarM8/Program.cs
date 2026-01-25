@@ -8,6 +8,15 @@ using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Keeps property names as-is (no camelCase conversion)
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+
+        // Optional: handle DateOnly correctly
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 builder.Services.AddControllersWithViews();
 

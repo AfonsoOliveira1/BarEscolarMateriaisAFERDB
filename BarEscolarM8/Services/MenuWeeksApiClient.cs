@@ -22,15 +22,19 @@ namespace APiConsumer.Services
             return await _httpClient.GetFromJsonAsync<MENUWEEK>($"api/MenuWeek/{id}");
         }
 
-        public async Task<bool> CreateMenuWeekAsync(MENUWEEK week)
+        public async Task<MENUWEEK?> CreateMenuWeekAsync(MENUWEEK week)
         {
             var response = await _httpClient.PostAsJsonAsync("api/MenuWeek", week);
-            return response.IsSuccessStatusCode;
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var createdWeek = await response.Content.ReadFromJsonAsync<MENUWEEK>();
+            return createdWeek;
         }
 
         public async Task<bool> UpdateMenuWeekAsync(MENUWEEK week)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/MenuWeek/{week.id}", week);
+            var response = await _httpClient.PutAsJsonAsync($"api/MenuWeek/{week.Id}", week);
             return response.IsSuccessStatusCode;
         }
 

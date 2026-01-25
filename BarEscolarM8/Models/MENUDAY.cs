@@ -6,8 +6,8 @@ namespace APiConsumer.Models
     {
         public int id { get; set; }
         public int? menuweekid { get; set; }
-        // Date como string para facilitar serialização; troque por DateTime se preferir
-        public string date { get; set; }
+        public DateOnly? date { get; set; }
+        public string dateString { get; set; }
         public string option { get; set; }
         public string maindish { get; set; }
         public string soup { get; set; }
