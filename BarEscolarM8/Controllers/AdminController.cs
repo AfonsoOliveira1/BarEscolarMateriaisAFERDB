@@ -44,6 +44,103 @@ namespace APiConsumer.Controllers
             return View();
         }
 
+        public async Task<IActionResult> Users()
+        {
+            var users = await _usersApi.GetUsersAsync();
+            return View("Users/IndexUsers", users); 
+        }
+
+        public IActionResult CreateUser()
+        {
+            return View("Users/CreateUser"); 
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateUser(
+            string fullName, string email, string username, string password, int role)
+        {
+            var hasher = new PasswordHasher<USERS>();
+
+            var newUser = new USERS
+            {
+                id = Guid.NewGuid().ToString(),
+                fullname = fullName,
+                email = email,
+                username = username,
+                role = role
+            };
+
+            newUser.passwordhash = hasher.HashPassword(newUser, password);
+
+            var (success, error) = await _usersApi.CreateUserAsync(newUser);
+
+            if (!success)
+            {
+                ModelState.AddModelError("", error ?? "Failed to create user");
+                return View("Users/CreateUser");
+            }
+
+            TempData["Success"] = "User created successfully!";
+            return RedirectToAction("Users");
+        }
+
+        public async Task<IActionResult> EditUser(string id)
+        {
+            var user = await _usersApi.GetUserAsync(id);
+            if (user == null) return NotFound();
+
+            return View("Users/EditUser", user); 
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUser(
+            string id, string fullName, string email, string username, string? password, int role)
+        {
+            var user = await _usersApi.GetUserAsync(id);
+            if (user == null) return NotFound();
+
+            user.fullname = fullName;
+            user.email = email;
+            user.username = username;
+            user.role = role;
+
+            if (!string.IsNullOrWhiteSpace(password))
+            {
+                var hasher = new PasswordHasher<USERS>();
+                user.passwordhash = hasher.HashPassword(user, password);
+            }
+
+            var success = await _usersApi.UpdateUserAsync(user);
+
+            if (!success)
+            {
+                ModelState.AddModelError("", "Failed to update user");
+                return View("Users/EditUser", user);
+            }
+
+            TempData["Success"] = "User updated successfully!";
+            return RedirectToAction("Users");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest();
+
+            var success = await _usersApi.DeleteUserAsync(id);
+
+            if (!success)
+            {
+                TempData["Error"] = "Failed to delete user.";
+            }
+            else
+            {
+                TempData["Success"] = "User deleted successfully!";
+            }
+
+            return RedirectToAction("Users");
+        }
         // ---------------- MENU WEEKS ----------------
         public async Task<IActionResult> MenuWeeks()
         {
@@ -188,23 +285,5 @@ namespace APiConsumer.Controllers
             return RedirectToAction("MenuWeeks");
         }
 
-
-        // ---------------- MENU DAYS ----------------
-        public IActionResult CreateDay(int weekId)
-        {
-            var day = new MENUDAY
-            {
-                menuweekid = weekId,
-                date = DateOnly.FromDateTime(DateTime.Today)
-            };
-            return View(day);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateDay(MENUDAY day)
-        {
-            await _menuDaysApi.CreateMenuDayAsync(day);
-            return RedirectToAction("MenuWeeks");
-        }
     }
 }
