@@ -125,42 +125,44 @@ namespace APiConsumer.Controllers
         [HttpPost]
         public async Task<IActionResult> EditWeek(int id, List<MENUDAY> weekDays)
         {
-            if (!ModelState.IsValid)
-            {
-                var weekReload = await _menuWeeksApi.GetMenuWeekAsync(id);
-                ViewBag.WeekDays = weekDays ?? new List<MENUDAY>();
-                return View("MenuWeeks/Edit", weekReload);
-            }
-
             var week = await _menuWeeksApi.GetMenuWeekAsync(id);
             if (week == null) return NotFound();
 
-            // Update the week itself if needed
-            await _menuWeeksApi.UpdateMenuWeekAsync(week);
-
             foreach (var day in weekDays)
             {
-                // Parse date string from form back into DateOnly
                 if (day.date == null && !string.IsNullOrWhiteSpace(day.dateString))
                 {
-                    if (DateOnly.TryParse(day.dateString, out var parsedDate))
-                    {
-                        day.date = parsedDate;
-                    }
+                    day.date = DateOnly.Parse(day.dateString);
                 }
 
-                // If it’s a new day
                 if (day.id == 0)
-                {
                     await _menuDaysApi.CreateMenuDayAsync(day);
-                }
                 else
-                {
                     await _menuDaysApi.UpdateMenuDayAsync(day);
-                }
             }
 
-            return RedirectToAction("MenuWeeks");
+            return RedirectToAction("EditWeek", new { id });
+        }
+        public async Task<IActionResult> EditMenuDay(int id)
+        {
+            var day = await _menuDaysApi.GetMenuDayAsync(id);
+            if (day == null)
+                return NotFound();
+
+            return View("MenuWeeks/EditMenuDay", day);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditMenuDay(MENUDAY day)
+        {
+            if (day.date == null && !string.IsNullOrWhiteSpace(day.dateString))
+            {
+                day.date = DateOnly.Parse(day.dateString);
+            }
+
+            await _menuDaysApi.UpdateMenuDayAsync(day);
+
+            return RedirectToAction("EditWeek", new { id = day.menuweekid });
         }
 
         [HttpPost]

@@ -1,0 +1,42 @@
+﻿@model APiConsumer.Models.MENUDAY
+
+<h2>Edit Menu Day</h2>
+
+<form asp-action="EditMenuDay" method="post">
+
+    <input type="hidden" asp-for="id" />
+    <input type="hidden" asp-for="menuweekid" />
+    <input type="hidden" name="dateString" value="@Model.date?.ToString("yyyy-MM-dd")" />
+    <input type="hidden" asp-for="option" />
+
+    <div class="mb-3">
+        <label>Date</label>
+        <input class="form-control"
+               value="@Model.date?.ToString("yyyy-MM-dd")"
+               readonly />
+    </div>
+
+    <div class="mb-3">
+        <label>Main Dish</label>
+        <input asp-for="maindish" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Soup</label>
+        <input asp-for="soup" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Dessert</label>
+        <input asp-for="dessert" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Notes</label>
+        <input asp-for="notes" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-action="MenuWeeks" class="btn btn-secondary">Cancel</a>
+
+</form>

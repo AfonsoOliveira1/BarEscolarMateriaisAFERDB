@@ -30,8 +30,8 @@ namespace APiConsumer.Services
 
         public async Task<bool> UpdateMenuDayAsync(MENUDAY day)
         {
-            // No conversion needed
             var response = await _httpClient.PutAsJsonAsync($"api/MenuDay/{day.id}", day);
+
             return response.IsSuccessStatusCode;
         }
 
