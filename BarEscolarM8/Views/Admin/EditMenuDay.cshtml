@@ -1,0 +1,38 @@
+﻿@model BarEscolarM8.Models.MenuDayUpdateDto
+
+<h2>Edit Menu Day</h2>
+
+<form asp-action="EditMenuDay" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="Menuweekid" />
+
+    <div class="mb-3">
+        <label>Date</label>
+        <input asp-for="Date" asp-forclass="form-control"
+               value="?.ToString("yyyy-MM-dd")"
+               readonly />
+    </div>
+
+    <div class="mb-3">
+        <label>Main Dish</label>
+        <input asp-for="MainDish" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Soup</label>
+        <input asp-for="Soup" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Dessert</label>
+        <input asp-for="Dessert" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Notes</label>
+        <input asp-for="Notes" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-action="EditWeek" asp-route-id="Menuweekid" class="btn btn-secondary">Cancel</a>
+</form>

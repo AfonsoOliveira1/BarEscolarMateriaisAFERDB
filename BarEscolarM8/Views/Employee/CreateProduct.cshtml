@@ -1,0 +1,78 @@
+﻿@model BarEscolarM8.Models.ProductCreateDto
+
+<h2>Create Product</h2>
+
+<form asp-action="ProductsCreate" method="post">
+
+    <div class="form-group">
+        <label>Name</label>
+        <input name="name" class="form-control" required />
+    </div>
+
+    <div class="form-group mt-2">
+        <label>Description</label>
+        <input name="description" class="form-control" />
+    </div>
+
+    <div class="form-group mt-2">
+        <label>Category</label>
+        <select name="categoryid" class="form-control">
+            @foreach (var c in ViewBag.Categories)
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group mt-2">
+        <label>Price (€)</label>
+        <input name="price" type="number" step="0.01" class="form-control" />
+    </div>
+
+    <hr />
+
+    <h5>Nutritional values</h5>
+
+    <div class="row">
+        <div class="col">
+            <label>Kcal</label>
+            <input name="kcal" type="number" class="form-control" />
+        </div>
+        <div class="col">
+            <label>Protein</label>
+            <input name="protein" type="number" class="form-control" />
+        </div>
+        <div class="col">
+            <label>Fat</label>
+            <input name="fat" type="number" class="form-control" />
+        </div>
+        <div class="col">
+            <label>Carbs</label>
+            <input name="carbs" type="number" class="form-control" />
+        </div>
+        <div class="col">
+            <label>Salt</label>
+            <input name="salt" type="number" class="form-control" />
+        </div>
+    </div>
+
+    <div class="form-group mt-2">
+        <label>Allergens</label>
+        <input name="allergens" class="form-control" />
+    </div>
+
+    <div class="form-group mt-2">
+        <label>Stock</label>
+        <input name="stock" type="number" class="form-control" />
+    </div>
+
+    <div class="form-group mt-2">
+        <label>Active</label>
+        <select name="isactive" class="form-control">
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+        </select>
+    </div>
+
+    <button class="btn btn-success mt-3">Save</button>
+</form>

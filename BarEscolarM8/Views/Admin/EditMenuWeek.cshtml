@@ -1,0 +1,45 @@
+﻿@model BarEscolarM8.Models.MenuWeekDto
+
+<form asp-action="EditMenuWeek" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label>Edit Date Week Start</label>
+        <input asp-for="Weekstart" class="form-control" />
+    </div>
+</form>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Option</th>
+            <th>Main Dish</th>
+            <th>Soup</th>
+            <th>Dessert</th>
+            <th>Notes</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var day in Model.MenuDays)
+        {
+            <tr>
+                <td>@day.Date.ToString("yyyy-MM-dd")</td>
+                <td>@day.Option</td>
+                <td>@day.MainDish</td>
+                <td>@day.Soup</td>
+                <td>@day.Dessert</td>
+                <td>@day.Notes</td>
+                <td>
+                    <a asp-action="EditMenuDay"
+                       asp-route-id="@day.Id"
+                       class="btn btn-sm btn-primary">
+                        Edit
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+    <a asp-action="Index" class="btn btn-secondary">Back</a>

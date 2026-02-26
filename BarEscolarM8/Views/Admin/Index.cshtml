@@ -1,4 +1,5 @@
-﻿@{
+﻿@model BarEscolarM8.Models.WeekXUsers
+@{
     ViewData["Title"] = "Admin Dashboard";
 }
 
@@ -10,39 +11,93 @@
         <div class="card admin-card">
             <div class="card-body">
                 <h5 class="card-title">Total Semanas de Menu</h5>
-                <p class="card-text">@ViewBag.Weeks.Count</p>
             </div>
         </div>
 
         <div class="card admin-card">
             <div class="card-body">
                 <h5 class="card-title">Total Produtos</h5>
-                <p class="card-text">@ViewBag.Products.Count</p>
             </div>
         </div>
 
         <div class="card admin-card">
             <div class="card-body">
                 <h5 class="card-title">Total Categorias</h5>
-                <p class="card-text">@ViewBag.Categories.Count</p>
             </div>
         </div>
 
         <div class="card admin-card">
             <div class="card-body">
                 <h5 class="card-title">Total Materiais</h5>
-                <p class="card-text">@ViewBag.Materials.Count</p>
             </div>
         </div>
     </div>
+    <div>
+        <h2>Users Management</h2>
 
-    <div class="dashboard-actions mt-4">
-        <a class="btn admin-btn" asp-action="MenuWeeks" asp-controller="Admin">Gerir Menus</a>
-        <a class="btn admin-btn" asp-action="Categories" asp-controller="Admin">Gerir Categorias</a>
-        <a class="btn admin-btn" asp-action="Products" asp-controller="Admin">Gerir Produtos</a>
-        <a class="btn admin-btn" asp-action="Users" asp-controller="Admin">Gerir Utilizadores</a>
-        <a class="btn admin-btn" asp-action="Material" asp-controller="Admin">Gerir Materiais</a>
-        <a class="btn admin-btn" asp-action="MaterialCategory" asp-controller="Admin">Gerir Categorias de Materiais</a>
+        <p>
+            <a asp-action="CreateUser" class="btn btn-primary">Create New User</a>
+        </p>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model.Users)
+                {
+                    <tr>
+                        <td>@u.FullName</td>
+                        <td>@u.Email</td>
+                        <td>@u.UserName</td>
+                        <td>@u.Role</td>
+                        <td>
+                            <a asp-action="EditUser" asp-route-id="@u.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <form asp-action="DeleteUser" asp-route-id="@u.Id" method="post" style="display:inline">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
+    <div>
+        <h2>Menu Weeks</h2>
 
+        <p>
+            <a asp-action="CreateWeek" class="btn btn-primary">Create New Week</a>
+        </p>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Week Start</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var week in Model.MenuWeek)
+                {
+                    <tr>
+                        <td>@week.Id</td>
+                        <td>@week.Weekstart</td>
+                        <td>
+                            <a asp-action="EditWeek" asp-route-id="@week.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <form asp-action="DeleteWeek" asp-route-id="@week.Id" method="post" style="display:inline">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this week?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
