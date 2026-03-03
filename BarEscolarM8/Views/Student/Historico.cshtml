@@ -1,0 +1,56 @@
+﻿@model IEnumerable<BarEscolarM8.Models.HistoricoViewDto>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger text-center mb-3">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p class="mb-1">@error.ErrorMessage</p>
+        }
+    </div>
+}
+@if(Model.Any())
+{
+    <div class="admin-table-wrapper mb-5">
+        <h3 class="page-title">Historico</h3>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Categoria</th>
+                    <th>Descrição</th>
+                    <th>Preço</th>
+                    <th>Quantidade</th>
+                    <th style="width: 160px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                        <td>@p.Categoryid</td>
+                        <td>@p.Description</td>
+                        <td>@p.Price?.ToString("F2") €</td>
+                        <td>@p.StockQuantidade</td>
+                        <td>
+                            <form asp-action="DeleteHistorico"
+                                  asp-route-id="@p.Id"
+                                  method="post"
+                                  style="display:inline">
+                                <button type="submit"
+                                        class="admin-btn-danger"
+                                        onclick="return confirm('Eliminar este Historico?')">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+}
+<a asp-action="Index" class="btn btn-secondary">Back</a>

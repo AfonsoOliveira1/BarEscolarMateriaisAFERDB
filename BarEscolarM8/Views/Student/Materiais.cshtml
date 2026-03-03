@@ -1,0 +1,59 @@
+﻿@model IEnumerable<BarEscolarM8.Models.MaterialViewModel>
+
+@if (TempData["ErroMateriais"] is string erro)
+{
+    <div class="alert alert-danger text-center mb-3">
+        <p class="mb-1">@erro</p>
+    </div>
+}
+
+@if (Model.Any())
+{
+    <h1 class="page-title">Materiais Escolares</h1>
+    <div class="admin-table-wrapper mb-5">
+        <h3 class="text-center mb-3">Materiais</h3>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Categoria</th>
+                    <th>Descrição</th>
+                    <th>Preço</th>
+                    <th>Stock</th>
+                    <th style="width: 160px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                        <td>@p.Categoryid</td>
+                        <td>@p.Description</td>
+                        <td>@p.Price.ToString("F2") €</td>
+                        <td>@p.Stock</td>
+                        <td>
+                            <form asp-action="ComprarMaterial" asp-route-materialId="@p.Id" method="post" class="d-flex align-items-center gap-2">
+                                <input type="number"
+                                       name="quantidade"
+                                       class="form-control form-control-sm"
+                                       value="1"
+                                       min="1"
+                                       max="@p.Stock"
+                                       style="width: 80px;" />
+
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    Comprar
+                                </button>
+                            </form>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+}
+<a asp-action="Index" class="btn btn-secondary">Back</a>

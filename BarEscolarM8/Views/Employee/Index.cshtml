@@ -1,35 +1,115 @@
-﻿@model List<BarEscolarM8.Models.ProductDto>
+﻿@model BarEscolarM8.Models.ProdxCat
 
-<h2>Products</h2>
+<div class="admin-dashboard-wrapper">
 
-<a asp-action="ProductsCreate" class="btn btn-primary">Create Product</a>
+    <h2 class="mb-4">Gestão de Produtos</h2>
 
-<table class="table mt-3">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var p in Model)
-        {
-            <tr>
-                <td>@p.Name</td>
-                <td>@p.CategoryId</td>
-                <td>@p.Price €</td>
-                <td>@p.Stock</td>
-                <td>@(p.IsActive == true ? "Active" : "Inactive")</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-warning">
-                        Edit
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="dashboard-actions mb-4">
+        <a asp-action="CreateProduct" class="admin-btn">Criar Produto</a>
+        <a asp-action="CreateCategory" class="admin-btn">Criar Categoria</a>
+    </div>
+
+    <!-- PRODUCTS TABLE -->
+    <div class="admin-table-wrapper mb-5">
+        <h3 class="text-center mb-3">Produtos</h3>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Categoria</th>
+                    <th>Preço</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th style="width: 160px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Products)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                        <td>@p.CategoryId</td>
+                        <td>@p.Price?.ToString("F2") €</td>
+                        <td>@p.Stock</td>
+                        <td>
+                            <span class="@(p.IsActive == true ? "status-marked" : "status-cancelled")">
+                                @(p.IsActive == true ? "Ativo" : "Inativo")
+                            </span>
+                        </td>
+                        <td>
+                            <a asp-action="Details"
+                               asp-route-id="@p.Id"
+                               class="btn btn-info btn-sm ms-2">
+                                Detalhes
+                            </a>
+
+                            <a asp-action="EditProduct"
+                               asp-route-id="@p.Id"
+                               class="admin-btn-warning me-2">
+                                Editar
+                            </a>
+
+                            <form asp-action="DeleteProduct"
+                                  asp-route-id="@p.Id"
+                                  method="post"
+                                  style="display:inline">
+                                <button type="submit"
+                                        class="admin-btn-danger"
+                                        onclick="return confirm('Eliminar este produto?')">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- CATEGORIES TABLE -->
+    <div class="admin-table-wrapper">
+        <h3 class="text-center mb-3">Categorias</h3>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th style="width: 160px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Categorys)
+                {
+                    <tr>
+                        <td>@c.Id</td>
+                        <td>@c.Name</td>
+                        <td>@c.Description</td>
+                        <td>
+                            <a asp-action="EditCategory"
+                               asp-route-id="@c.Id"
+                               class="admin-btn-warning me-2">
+                                Editar
+                            </a>
+
+                            <form asp-action="DeleteCategory"
+                                  asp-route-id="@c.Id"
+                                  method="post"
+                                  style="display:inline">
+                                <button type="submit"
+                                        class="admin-btn-danger"
+                                        onclick="return confirm('Eliminar esta categoria?')">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>

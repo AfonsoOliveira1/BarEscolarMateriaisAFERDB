@@ -455,3 +455,50 @@ WRAPPERS
     .admin-btn-secondary:hover {
         background-color: #2a4365 !important;
     }
+
+.form-label {
+    text-align: left !important;
+    width: 100%;
+}
+
+/* Custom checkbox */
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+    .custom-checkbox input[type="checkbox"] {
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        border: 2px solid #2f855a;
+        border-radius: 6px;
+        background: white;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .custom-checkbox input[type="checkbox"]:checked {
+            background-color: #2f855a;
+            border-color: #276749;
+        }
+
+            .custom-checkbox input[type="checkbox"]:checked::after {
+                content: "X";
+                color: white;
+                font-size: 16px;
+                position: relative;
+                left: 3px;
+                top: -1px;
+            }
+a.btn, a.admin-btn-warning, a.admin-btn-danger, a.admin-btn-secondary {
+    text-decoration: none !important;
+}
+
+.admin-table td:first-child,
+.admin-table td:nth-child(2) {
+    text-align: left !important;
+}

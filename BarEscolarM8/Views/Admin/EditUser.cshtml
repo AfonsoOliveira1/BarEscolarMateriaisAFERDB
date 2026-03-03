@@ -4,6 +4,15 @@
 }
 
 <h2>Edit User</h2>
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger mt-3 text-center">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p class="mb-1">@error.ErrorMessage</p>
+        }
+    </div>
+}
 
 <form asp-action="EditUser" method="post">
     <input type="hidden" name="id" value="@Model.Id" />

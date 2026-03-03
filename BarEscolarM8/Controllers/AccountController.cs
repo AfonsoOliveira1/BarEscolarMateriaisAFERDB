@@ -109,7 +109,7 @@ namespace BarEscolarM8.Controllers
             //  limpar Cookie 
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            return View("Login");
+            return RedirectToAction("Login");
         }
     }
 }

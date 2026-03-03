@@ -1,8 +1,10 @@
 ﻿namespace BarEscolarM8.Models
 {
-    public class MenuDayUpdateDto
+    public class MenuDayDto
     {
+        public int Id { get; set; }
         public int Menuweekid { get; set; }
+
         public DateOnly? Date { get; set; }
         public string Option { get; set; }
         public string MainDish { get; set; }

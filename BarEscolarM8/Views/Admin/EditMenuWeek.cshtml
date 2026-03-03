@@ -1,5 +1,13 @@
 ﻿@model BarEscolarM8.Models.MenuWeekDto
-
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger mt-3 text-center">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p class="mb-1">@error.ErrorMessage</p>
+        }
+    </div>
+}
 <form asp-action="EditMenuWeek" method="post">
     <input type="hidden" asp-for="Id" />
 
@@ -7,7 +15,10 @@
         <label>Edit Date Week Start</label>
         <input asp-for="Weekstart" class="form-control" />
     </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
 </form>
+
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -36,10 +47,14 @@
                        class="btn btn-sm btn-primary">
                         Edit
                     </a>
+                    <form asp-action="DeleteDay" asp-route-id="@day.Id" asp-route-menuweekid="@Model.Id"
+                          method="post" style="display:inline">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this day?')">Delete</button>
+                    </form>
                 </td>
             </tr>
         }
     </tbody>
 </table>
 
-    <a asp-action="Index" class="btn btn-secondary">Back</a>
+<a asp-action="Index" class="btn btn-secondary">Back</a>

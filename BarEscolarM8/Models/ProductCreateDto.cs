@@ -13,6 +13,6 @@
         public int? Salt { get; set; }
         public string Allergens { get; set; }
         public int? Stock { get; set; }
-        public bool? IsActive { get; set; }
+        public bool IsActive { get; set; }
     }
 }

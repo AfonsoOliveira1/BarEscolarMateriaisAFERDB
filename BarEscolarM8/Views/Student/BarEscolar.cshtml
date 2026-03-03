@@ -1,0 +1,59 @@
+﻿@model IEnumerable<BarEscolarM8.Models.ProductDto>
+
+@if (TempData["ErroCompra"] is string erro)
+{
+    <div class="alert alert-danger text-center mb-3">
+        <p class="mb-1">@erro</p>
+    </div>
+}
+<!-- PRODUCTS TABLE -->
+<div class="admin-table-wrapper mb-5">
+    <h3 class="page-title">Produtos</h3>
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Stock</th>
+                <th>Descrição</th>
+                <th style="width: 160px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td>@p.Name</td>
+                    <td>@p.CategoryId</td>
+                    <td>@p.Price?.ToString("F2") €</td>
+                    <td>@p.Stock</td>
+                    <td>@p.Description</td>
+                    <td>
+                        <a asp-action="Details"
+                           asp-route-id="@p.Id"
+                           class="btn btn-info btn-sm ms-2">
+                            Detalhes
+                        </a>
+                        <form asp-action="ComprarProduto" asp-route-id="@p.Id" method="post" class="d-flex align-items-center gap-2">
+                            <input type="number"
+                                   name="qtd"
+                                   class="form-control form-control-sm"
+                                   value="1"
+                                   min="1"
+                                   max="@p.Stock"
+                                   style="width: 80px;" />
+
+                            <button type="submit" class="btn btn-success btn-sm">
+                                Comprar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+<a asp-action="Index" class="btn btn-secondary">Back</a>

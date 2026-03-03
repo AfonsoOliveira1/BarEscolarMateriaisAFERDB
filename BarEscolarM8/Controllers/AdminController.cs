@@ -5,6 +5,7 @@ using Azure;
 using BarEscolarM8.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace BarEscolarM8.Controllers
 {
@@ -27,13 +28,28 @@ namespace BarEscolarM8.Controllers
 
             var weeksResponse = await client.GetFromJsonAsync<IEnumerable<MenuWeekDto>>("api/MenuWeek");
             var usersResponse = await client.GetFromJsonAsync<IEnumerable<UserReadDto>>("api/User");
+            var prodResponse = await client.GetFromJsonAsync<IEnumerable<ProductDto>>("api/Product");
+            var catResponse = await client.GetFromJsonAsync<IEnumerable<CategoryDto>>("api/Category");
+            //var matResponse = await client.GetFromJsonAsync<IEnumerable<>>("api/Material");
+           // var matcatResponse = await client.GetFromJsonAsync<IEnumerable<>>("api/MaterialCategory");
+            var daysResponse = await client.GetFromJsonAsync<IEnumerable<MenuDayDto>>("api/MenuDay");
 
             var userxweek = new WeekXUsers();
             userxweek.MenuWeek = weeksResponse;
             userxweek.Users = usersResponse;
+
+            userxweek.Counts = new Counts();
+            userxweek.Counts.weeksCount = weeksResponse?.Count() ?? 0;
+            userxweek.Counts.usersCount = usersResponse?.Count() ?? 0;
+            userxweek.Counts.daysCount = daysResponse?.Count() ?? 0;
+            userxweek.Counts.matCount = 0;//matResponse?.Count() ?? 0;
+            userxweek.Counts.matcatCount = 0;// matcatResponse?.Count() ?? 0;
+            userxweek.Counts.prodCount = prodResponse?.Count() ?? 0;
+            userxweek.Counts.catCount = catResponse?.Count() ?? 0;
+
             return View(userxweek);
         }
-        public IActionResult CreateUser() => View("Users/CreateUser");
+        public IActionResult CreateUser() => View("CreateUser");
 
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserCreateDto model)
@@ -42,8 +58,13 @@ namespace BarEscolarM8.Controllers
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await client.PostAsJsonAsync("api/User/register", model);
-
-            return RedirectToAction("Users");
+            if(response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "User created successfully!";
+                return RedirectToAction("Index");
+            }
+            ModelState.AddModelError("", "Erro ao criar o user");
+            return View("CreateUser");
         }
 
         public async Task<IActionResult> EditUser(string id)
@@ -72,8 +93,9 @@ namespace BarEscolarM8.Controllers
                 TempData["Success"] = "User updated successfully!";
                 return RedirectToAction("Index");
             }
-            ModelState.AddModelError("", "Erro editar");
-            return RedirectToAction("EditUser", model.Id);
+            var error = await response.Content.ReadAsStringAsync();
+            ModelState.AddModelError("", error);
+            return View("EditUser", model);
         }
 
         [HttpPost]
@@ -87,10 +109,10 @@ namespace BarEscolarM8.Controllers
             return RedirectToAction("Index");
         }
         // ---------------- MENU WEEKS ----------------
-        public IActionResult CreateWeek() => View("Create");
+        public IActionResult CreateMenuWeek() => View("CreateMenuWeek");
 
         [HttpPost]
-        public async Task<IActionResult> CreateWeek(MenuWeekCreateDto model)
+        public async Task<IActionResult> CreateMenuWeek(MenuWeekCreateDto model)
         {
             var client = _clientFactory.CreateClient("APIBarescola");
             var token = User.FindFirst("JWToken")?.Value;
@@ -99,30 +121,31 @@ namespace BarEscolarM8.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                ModelState.AddModelError("", "Erro ao encontar o user");
-                return RedirectToAction("Index");
+                var error = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", error);
+                return View("CreateMenuWeek", model);
             }
 
             TempData["Success"] = "Semana criada com sucesso!";
             return RedirectToAction("Index");
         }
 
-        public async Task<IActionResult> EditWeek(int id)
+        public async Task<IActionResult> EditMenuWeek(int id)
         {
             var client = _clientFactory.CreateClient("APIBarescola");
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await client.GetFromJsonAsync<MenuWeekCreateDto>($"api/MenuWeek/{id}");
+            var response = await client.GetFromJsonAsync<MenuWeekDto>($"api/MenuWeek/{id}");
             if (response == null)
             {
                 ModelState.AddModelError("", "Erro ao encontar o menuweek");
                 return RedirectToAction("Index");
             }
-            return RedirectToAction("EditMenuWeek", response);
+            return View(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditWeek(int id, MenuWeekCreateDto model)
+        public async Task<IActionResult> EditMenuWeek(int id, MenuWeekCreateDto model)
         {
             var client = _clientFactory.CreateClient("APIBarescola");
             var token = User.FindFirst("JWToken")?.Value;
@@ -131,20 +154,25 @@ namespace BarEscolarM8.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                ModelState.AddModelError("", "Erro ao editar o menuweek");
-                return RedirectToAction("Index");
+                var error = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", error);
+                var reload = await client.GetFromJsonAsync<MenuWeekDto>($"api/MenuWeek/{id}");
+                return View("EditMenuWeek", reload);
             }
-            return View("EditMenuWeek", response);
+
+            return RedirectToAction("EditMenuWeek", new { id = model.Id });
         }
+
         public async Task<IActionResult> EditMenuDay(int id)
         {
             var client = _clientFactory.CreateClient("APIBarescola");
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await client.GetAsync($"api/MenuDay/{id}");
-            if (!response.IsSuccessStatusCode)
+            var response = await client.GetFromJsonAsync<MenuDayUpdateDto>($"api/MenuDay/{id}");
+
+            if (response == null)
             {
-                ModelState.AddModelError("", "Erro ao encontar o menuweek");
+                ModelState.AddModelError("", "Erro ao encontar o menuday");
                 return RedirectToAction("Index");
             }
             return View("EditMenuDay", response);
@@ -156,15 +184,18 @@ namespace BarEscolarM8.Controllers
             var client = _clientFactory.CreateClient("APIBarescola");
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await client.PutAsJsonAsync($"api/MenuWeek/update/{id}", model);
+            var response = await client.PutAsJsonAsync($"api/MenuDay/update/{id}", model);
 
             if (!response.IsSuccessStatusCode)
             {
-                ModelState.AddModelError("", "Erro ao editar o menuweek");
-                return RedirectToAction("Index");
+                var error = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", error);
+                return View("EditMenuDay", model);
             }
-            return View("EditMenuWeek", response);
+
+            return RedirectToAction("EditMenuWeek", new { id = model.Menuweekid });
         }
+
 
         [HttpPost]
         public async Task<IActionResult> DeleteWeek(int id)
@@ -179,14 +210,14 @@ namespace BarEscolarM8.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> DeleteDay(int id)
+        public async Task<IActionResult> DeleteDay(int id, int menuweekid)
         {
             var client = _clientFactory.CreateClient("APIBarescola");
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await client.DeleteAsync($"api/MenuDay/delete/{id}");
 
-            return RedirectToAction("Index");
+            return RedirectToAction("EditMenuWeek", new { id = menuweekid });
         }
     }
 }

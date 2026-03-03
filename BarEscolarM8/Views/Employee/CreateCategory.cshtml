@@ -1,0 +1,44 @@
+﻿@model BarEscolarM8.Models.CategoryCreateDto
+
+@{
+    ViewData["Title"] = "Criar Categoria";
+}
+
+<h2 class="text-center mb-4">Criar Categoria</h2>
+
+<div class="admin-dashboard-wrapper">
+
+    <div class="admin-card" style="max-width: 700px; margin: 0 auto;">
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger text-center mb-3">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p class="mb-1">@error.ErrorMessage</p>
+                }
+            </div>
+        }
+
+        <form asp-action="CreateCategory" method="post">
+
+            <div class="form-group">
+                <label asp-for="Name" class="form-label">Nome</label>
+                <input asp-for="Name" class="form-input" />
+                <span asp-validation-for="Name" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Description" class="form-label">Descrição</label>
+                <textarea asp-for="Description" class="form-input"></textarea>
+                <span asp-validation-for="Description" class="validation-error"></span>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary flex-fill">Guardar Alterações</button>
+                <a asp-action="Index" class="btn btn-secondary flex-fill">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+</div>

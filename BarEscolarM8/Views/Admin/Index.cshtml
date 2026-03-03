@@ -11,24 +11,42 @@
         <div class="card admin-card">
             <div class="card-body">
                 <h5 class="card-title">Total Semanas de Menu</h5>
+                <h5 class="card-title">@Model.Counts.weeksCount</h5>
+            </div>
+        </div>
+
+        <div class="card admin-card">
+            <div class="card-body">
+                <h5 class="card-title">Total Dias de Menu</h5>
+                <h5 class="card-title">@Model.Counts.daysCount</h5>
             </div>
         </div>
 
         <div class="card admin-card">
             <div class="card-body">
                 <h5 class="card-title">Total Produtos</h5>
+                <h5 class="card-title">@Model.Counts.prodCount</h5>
             </div>
         </div>
 
         <div class="card admin-card">
             <div class="card-body">
                 <h5 class="card-title">Total Categorias</h5>
+                <h5 class="card-title">@Model.Counts.catCount</h5>
             </div>
         </div>
 
         <div class="card admin-card">
             <div class="card-body">
                 <h5 class="card-title">Total Materiais</h5>
+                <h5 class="card-title">@Model.Counts.matCount</h5>
+            </div>
+        </div>
+
+        <div class="card admin-card">
+            <div class="card-body">
+                <h5 class="card-title">Total Categorias de Materiais</h5>
+                <h5 class="card-title">@Model.Counts.matcatCount</h5>
             </div>
         </div>
     </div>
@@ -72,7 +90,7 @@
         <h2>Menu Weeks</h2>
 
         <p>
-            <a asp-action="CreateWeek" class="btn btn-primary">Create New Week</a>
+            <a asp-action="CreateMenuWeek" class="btn btn-primary">Create New Week</a>
         </p>
 
         <table class="table table-striped">
@@ -90,7 +108,7 @@
                         <td>@week.Id</td>
                         <td>@week.Weekstart</td>
                         <td>
-                            <a asp-action="EditWeek" asp-route-id="@week.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <a asp-action="EditMenuWeek" asp-route-id="@week.Id" class="btn btn-sm btn-warning">Edit</a>
                             <form asp-action="DeleteWeek" asp-route-id="@week.Id" method="post" style="display:inline">
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this week?')">Delete</button>
                             </form>

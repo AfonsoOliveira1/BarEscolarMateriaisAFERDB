@@ -3,14 +3,19 @@
 <h2>Edit Menu Day</h2>
 
 <form asp-action="EditMenuDay" method="post">
-    <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="Menuweekid" />
 
     <div class="mb-3">
-        <label>Date</label>
-        <input asp-for="Date" asp-forclass="form-control"
-               value="?.ToString("yyyy-MM-dd")"
-               readonly />
+        <label>Edit Date Week Start</label>
+        <input asp-for="Date" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Option</label>
+        <select asp-for="Option" class="form-control">
+            <option value="Vegan">Vegan</option>
+            <option value="Non-Vegan">Non-Vegan</option>
+        </select>
     </div>
 
     <div class="mb-3">
@@ -34,5 +39,15 @@
     </div>
 
     <button type="submit" class="btn btn-success">Save</button>
-    <a asp-action="EditWeek" asp-route-id="Menuweekid" class="btn btn-secondary">Cancel</a>
+    <a asp-action="EditMenuWeek" asp-route-id="@Model.Menuweekid" class="btn btn-secondary">Cancel</a>
 </form>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger mt-3 text-center">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p class="mb-1">@error.ErrorMessage</p>
+        }
+    </div>
+}

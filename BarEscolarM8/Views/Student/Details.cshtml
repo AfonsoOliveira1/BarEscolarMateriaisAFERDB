@@ -1,0 +1,70 @@
+﻿@model BarEscolarM8.Models.ProductDto
+
+@{
+    ViewData["Title"] = "Detalhes do Produto";
+}
+
+<h2>Detalhes do Produto</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+
+        <h4>@Model.Name</h4>
+        <p class="text-muted">@Model.Description</p>
+
+        <hr />
+
+        <h5>Informações Gerais</h5>
+        <dl class="row">
+            <dt class="col-sm-3">ID</dt>
+            <dd class="col-sm-9">@Model.Id</dd>
+
+            <dt class="col-sm-3">Categoria</dt>
+            <dd class="col-sm-9">@Model.CategoryName</dd>
+
+            <dt class="col-sm-3">Ativo</dt>
+            <dd class="col-sm-9">
+                @(Model.IsActive == true ? "Sim" : "Não")
+            </dd>
+        </dl>
+
+        <hr />
+
+        <h5>Preço e Stock</h5>
+        <dl class="row">
+            <dt class="col-sm-3">Preço</dt>
+            <dd class="col-sm-9">@Model.Price?.ToString("0.00") €</dd>
+
+            <dt class="col-sm-3">Stock</dt>
+            <dd class="col-sm-9">@Model.Stock</dd>
+        </dl>
+
+        <hr />
+
+        <h5>Informação Nutricional</h5>
+        <dl class="row">
+            <dt class="col-sm-3">Kcal</dt>
+            <dd class="col-sm-9">@Model.Kcal</dd>
+
+            <dt class="col-sm-3">Proteína</dt>
+            <dd class="col-sm-9">@Model.Protein g</dd>
+
+            <dt class="col-sm-3">Gordura</dt>
+            <dd class="col-sm-9">@Model.Fat g</dd>
+
+            <dt class="col-sm-3">Hidratos</dt>
+            <dd class="col-sm-9">@Model.Carbs g</dd>
+
+            <dt class="col-sm-3">Sal</dt>
+            <dd class="col-sm-9">@Model.Salt g</dd>
+
+            <dt class="col-sm-3">Alergénios</dt>
+            <dd class="col-sm-9">@Model.Allergens</dd>
+        </dl>
+
+        <hr />
+
+        <a asp-action="BarEscolar" class="btn btn-secondary">Voltar</a>
+
+    </div>
+</div>

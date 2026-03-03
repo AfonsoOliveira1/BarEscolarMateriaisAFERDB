@@ -13,13 +13,13 @@ namespace BarEscolarM8.Models
 
     public class UserViewModelJSON
     {
-        [JsonPropertyName("nameid")]
+        [JsonPropertyName("id")]
         public string Id { get; set; } = "";
 
-        [JsonPropertyName("unique_name")]
+        [JsonPropertyName("userName")]
         public string UserName { get; set; } = "";
 
-        [JsonPropertyName("FullName")]
+        [JsonPropertyName("fullName")]
         public string FullName { get; set; } = "";
 
         [JsonPropertyName("email")]
@@ -28,4 +28,5 @@ namespace BarEscolarM8.Models
         [JsonPropertyName("role")]
         public string Role { get; set; } = "STUDENT";
     }
+
 }

@@ -1,18 +1,20 @@
-﻿@*
-
+﻿@model IEnumerable<MenuWeekDto>
+@using System.Security.Claims;
 @{
     ViewData["Title"] = "Aluno";
-    var selectedOption = ViewBag.SelectedOption ?? "A";
 }
 
-<h1 class="page-title">Bem-vindo,</h1>
+<h1 class="page-title">
+    Bem-vindo, @User.Identity?.Name
+</h1>
 
 <!-- Top Buttons -->
 <div class="top-buttons">
     <center>
-    <a asp-action="Historico" class="btn btn-primary">Histórico</a>
-    <a asp-action="MenusMarcados"  class="btn btn-primary">Menus Marcados</a>
-    <a asp-action="Bar" class="btn btn-primary">Bar da Escola</a>
+        <a asp-action="MenusMarcados" class="btn btn-primary">Menus Marcados</a>
+        <a asp-action="BarEscolar" class="btn btn-primary">Bar da Escola</a>
+        <a asp-action="Materiais" class="btn btn-primary">Materiais da Escola</a>
+        <a asp-action="Historico" asp-route-id="@User.FindFirst(ClaimTypes.NameIdentifier).Value" class="btn btn-primary">Histórico de Materiais</a>
     </center>
 </div>
 
@@ -22,13 +24,13 @@
 <div class="menu-tabs">
     <a asp-action="Index"
        asp-route-option="A"
-       class="@(selectedOption == "A" ? "tab-active" : "")">
+       class="tab-active">
         Não-Vegan
     </a>
 
     <a asp-action="Index"
        asp-route-option="B"
-       class="@(selectedOption == "B" ? "tab-active" : "")">
+       class="tab-active">
         Vegan
     </a>
 </div>
@@ -37,7 +39,7 @@
 @foreach (var week in Model)
 {
     <div class="card mb-4 shadow-sm p-3">
-        <h4>Semana começando em: @week.weekstart</h4>
+        <h4>Semana começando em: @week.Weekstart</h4>
 
         <table class="table cafeteria-table table-striped mt-2">
             <thead>
@@ -52,16 +54,17 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var menuDay in week.menudays)
+                @foreach (var menuDay in week.MenuDays)
                 {
                     <tr>
-                        <td>@menuDay.date</td>
-                        <td>@menuDay.maindish</td>
-                        <td>@menuDay.soup</td>
-                        <td>@menuDay.dessert</td>
-                        <td>@menuDay.notes</td>
-                        <td>@(menuDay.option == "A" ? "Não-Vegan" : "Vegan")</td>
+                        <td>@menuDay.Date</td>
+                        <td>@menuDay.MainDish</td>
+                        <td>@menuDay.Soup</td>
+                        <td>@menuDay.Dessert</td>
+                        <td>@menuDay.Notes</td>
+                        <td>@menuDay.Option</td>
                         <td>
+                            @*
                             @{
                                 var marked = ((List<int>)ViewBag.MarkedMenuIds).Contains(menuDay.id);
                                 var remaining = menuDay.maxseats - (((Dictionary<int, int>)ViewBag.RemainingSeats)
@@ -75,12 +78,12 @@
                             else
                             {
                                 <a asp-action="Marcar"
-                                   asp-route-id="@ViewBag.User.ID"
-                                   asp-route-menuId="@menuDay.id"
+                                   asp-route-menuId="@menuDay.Id"
                                    class="btn btn-success btn-sm">
                                     Marcar (@remaining)
                                 </a>
                             }
+                            *@
                         </td>
                     </tr>
                 }
@@ -88,4 +91,3 @@
         </table>
     </div>
 }
-*@

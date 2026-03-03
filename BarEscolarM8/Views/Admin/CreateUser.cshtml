@@ -3,6 +3,15 @@
 }
 
 <h2>Create User</h2>
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger mt-3 text-center">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p class="mb-1">@error.ErrorMessage</p>
+        }
+    </div>
+}
 
 <form asp-action="CreateUser" method="post">
     <div class="form-group">
@@ -31,5 +40,5 @@
     </div>
     <br />
     <button type="submit" class="btn btn-success">Create</button>
-    <a asp-action="Users" asp-route-userid="@ViewBag.User?.Id" class="btn btn-secondary">Cancel</a>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>

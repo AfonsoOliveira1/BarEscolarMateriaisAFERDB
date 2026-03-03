@@ -3,26 +3,23 @@
 }
 
 <h2>Create Week</h2>
-
-@if (TempData["Success"] != null)
+@if (!ViewData.ModelState.IsValid)
 {
-    <div class="alert alert-success">@TempData["Success"]</div>
+    <div class="alert alert-danger mt-3 text-center">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p class="mb-1">@error.ErrorMessage</p>
+        }
+    </div>
 }
 
-<form asp-action="CreateWeek" method="post">
+<form asp-action="CreateMenuWeek" method="post">
     <div class="form-group">
         <label for="weekStart">Start Date</label>
-        <input type="date" id="weekStart" name="weekStart" class="form-control"
-               value="@(ViewBag.EnteredDate ?? DateTime.Today.ToString("yyyy-MM-dd"))" required />
-        <span class="text-danger">
-            @foreach (var err in ViewData.ModelState["weekStart"]?.Errors ?? Enumerable.Empty<Microsoft.AspNetCore.Mvc.ModelBinding.ModelError>())
-            {
-                @err.ErrorMessage
-            }
-        </span>
+        <input type="date" id="weekStart" name="Weekstart" class="form-control" required />
     </div>
 
     <br />
     <button type="submit" class="btn btn-success">Create Week</button>
-    <a asp-action="MenuWeeks" class="btn btn-secondary">Cancel</a>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>
