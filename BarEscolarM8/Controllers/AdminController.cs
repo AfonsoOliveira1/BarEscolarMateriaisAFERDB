@@ -161,6 +161,7 @@ namespace BarEscolarM8.Controllers
             }
 
             return RedirectToAction("EditMenuWeek", new { id = model.Id });
+
         }
 
         public async Task<IActionResult> EditMenuDay(int id)
