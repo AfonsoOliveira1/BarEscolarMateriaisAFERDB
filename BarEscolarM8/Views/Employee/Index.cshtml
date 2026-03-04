@@ -2,7 +2,7 @@
 
 <div class="admin-dashboard-wrapper">
 
-    <h2 class="mb-4">Gestão de Produtos</h2>
+    <h2 class="mb-4">Gestão de Produtos e Categorias</h2>
 
     <div class="dashboard-actions mb-4">
         <a asp-action="CreateProduct" class="admin-btn">Criar Produto</a>
@@ -29,7 +29,7 @@
                 {
                     <tr>
                         <td>@p.Name</td>
-                        <td>@p.CategoryId</td>
+                        <td>@p.CategoryName</td>
                         <td>@p.Price?.ToString("F2") €</td>
                         <td>@p.Stock</td>
                         <td>
@@ -43,23 +43,6 @@
                                class="btn btn-info btn-sm ms-2">
                                 Detalhes
                             </a>
-
-                            <a asp-action="EditProduct"
-                               asp-route-id="@p.Id"
-                               class="admin-btn-warning me-2">
-                                Editar
-                            </a>
-
-                            <form asp-action="DeleteProduct"
-                                  asp-route-id="@p.Id"
-                                  method="post"
-                                  style="display:inline">
-                                <button type="submit"
-                                        class="admin-btn-danger"
-                                        onclick="return confirm('Eliminar este produto?')">
-                                    Eliminar
-                                </button>
-                            </form>
                         </td>
                     </tr>
                 }

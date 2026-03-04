@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<BarEscolarM8.Models.MaterialViewModel>
+@using System.Security.Claims;
 
 @if (TempData["ErroMateriais"] is string erro)
 {
@@ -9,7 +10,16 @@
 
 @if (Model.Any())
 {
-    <h1 class="page-title">Materiais Escolares</h1>
+    <h1 class="page-title">
+        Loja de Materiais
+    </h1>
+
+    <div class="top-buttons">
+        <center>
+            <a asp-action="Historico" asp-route-id="@User.FindFirst(ClaimTypes.NameIdentifier).Value" class="btn btn-primary">Histórico de Materiais</a>
+        </center>
+    </div>
+
     <div class="admin-table-wrapper mb-5">
         <h3 class="text-center mb-3">Materiais</h3>
 
@@ -53,7 +63,7 @@
                 }
             </tbody>
         </table>
+        <a asp-action="Index" class="btn btn-secondary">Back</a>
 
     </div>
 }
-<a asp-action="Index" class="btn btn-secondary">Back</a>

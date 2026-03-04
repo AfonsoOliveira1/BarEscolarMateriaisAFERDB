@@ -64,7 +64,23 @@
 
         <hr />
 
-        <a asp-action="EditProduct" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+
+        <a asp-action="EditProduct"
+           asp-route-id="@Model.Id"
+           class="admin-btn-warning me-2">
+            Editar
+        </a>
+
+        <form asp-action="DeleteProduct"
+              asp-route-id="@Model.Id"
+              method="post"
+              style="display:inline">
+            <button type="submit"
+                    class="admin-btn-danger"
+                    onclick="return confirm('Eliminar este produto?')">
+                Eliminar
+            </button>
+        </form>
         <a asp-action="Index" class="btn btn-secondary">Voltar</a>
 
     </div>

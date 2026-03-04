@@ -38,6 +38,11 @@
         <input asp-for="Notes" class="form-control" />
     </div>
 
+    <div class="mb-3">
+        <label>Max Seats</label>
+        <input asp-for="MaxSeats" class="form-control" required />
+    </div>
+
     <button type="submit" class="btn btn-success">Save</button>
     <a asp-action="EditMenuWeek" asp-route-id="@Model.Menuweekid" class="btn btn-secondary">Cancel</a>
 </form>

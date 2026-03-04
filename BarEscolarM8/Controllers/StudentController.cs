@@ -21,6 +21,8 @@ namespace BarEscolarM8.Controllers
         {
             _clientFactory = clientFactory;
         }
+
+        // ---------------- MENUs --------------------
         public async Task<IActionResult> Index(string option = "A")
         {
             if (option == "A")
@@ -28,12 +30,62 @@ namespace BarEscolarM8.Controllers
             else
                 option = "Vegan";
 
+            var user = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var client = _clientFactory.CreateClient("APIBarescola");
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await client.GetFromJsonAsync<IEnumerable<MenuWeekDto>>($"api/MenuWeek/option/{option}");
-
+            var usermenus = await client.GetFromJsonAsync<IEnumerable<MenuMarcadoDto>>($"/api/MenuDay/MenusMarked/User/{user}");
+            ViewBag.MarkedMenuIds = usermenus.Select(u => u.Id).ToList();
             return View(response);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Marcar(int menuId, string option)
+        {
+            var client = _clientFactory.CreateClient("APIBarescola");
+            var token = User.FindFirst("JWToken")?.Value;
+
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            MarkMenuDto mark = new MarkMenuDto { Id = User.FindFirst(ClaimTypes.NameIdentifier).Value, menuId = menuId };
+
+            var httpResponse = await client.PostAsJsonAsync($"/api/MenuDay/MarkMenu", mark);
+
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                var error = await httpResponse.Content.ReadAsStringAsync();
+                TempData["ErroMarcar"] = error;
+                return RedirectToAction("Index", new {option = option});
+            }
+            return RedirectToAction("Index", new { option = option });
+        }
+
+        public async Task<IActionResult> MenusMarcados()
+        {
+            var user = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var client = _clientFactory.CreateClient("APIBarescola");
+            var token = User.FindFirst("JWToken")?.Value;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var usermenus = await client.GetFromJsonAsync<IEnumerable<MenuMarcadoDto>>($"/api/MenuDay/MenusMarked/User/{user}");
+            return View(usermenus);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            var user = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var client = _clientFactory.CreateClient("APIBarescola");
+            var token = User.FindFirst("JWToken")?.Value;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var usermenus = await client.DeleteAsync($"/api/MenuDay/cancel/{orderId}");
+            if (!usermenus.IsSuccessStatusCode)
+            {
+                var error = await usermenus.Content.ReadAsStringAsync();
+                TempData["MenusMarcados"] = error;
+                return RedirectToAction("MenusMarcados");
+            }
+            return RedirectToAction("MenusMarcados");
         }
         // ---------------- MATERIAIS ----------------
         public async Task<IActionResult> Materiais()
@@ -145,6 +197,15 @@ namespace BarEscolarM8.Controllers
                 return RedirectToAction("BarEscolar");
             }
             return RedirectToAction("BarEscolar");
+        }
+        public async Task<IActionResult> ProdutosComprados()
+        {
+            var user = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var client = _clientFactory.CreateClient("APIBarescola");
+            var token = User.FindFirst("JWToken")?.Value;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var userprodutos = await client.GetFromJsonAsync<IEnumerable<ProductBoughtDto>>($"/api/Product/ProductsBought/User/{user}");
+            return View(userprodutos);
         }
     }
 }

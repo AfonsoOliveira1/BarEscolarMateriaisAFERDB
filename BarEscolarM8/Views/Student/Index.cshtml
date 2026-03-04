@@ -5,16 +5,22 @@
 }
 
 <h1 class="page-title">
-    Bem-vindo, @User.Identity?.Name
+    Bem-vindo, @User.FindFirst("FullName").Value
 </h1>
 
 <!-- Top Buttons -->
 <div class="top-buttons">
     <center>
-        <a asp-action="MenusMarcados" class="btn btn-primary">Menus Marcados</a>
         <a asp-action="BarEscolar" class="btn btn-primary">Bar da Escola</a>
         <a asp-action="Materiais" class="btn btn-primary">Materiais da Escola</a>
-        <a asp-action="Historico" asp-route-id="@User.FindFirst(ClaimTypes.NameIdentifier).Value" class="btn btn-primary">Histórico de Materiais</a>
+    </center>
+</div>
+
+<h2>Historico de Menus</h2>
+
+<div class="top-buttons">
+    <center>
+        <a asp-action="MenusMarcados" class="btn btn-primary">Menus Marcados</a>
     </center>
 </div>
 
@@ -34,7 +40,12 @@
         Vegan
     </a>
 </div>
-
+@if (TempData["ErroMarcar"] is string erro)
+{
+    <div class="alert alert-danger text-center mb-3">
+        <p class="mb-1">@erro</p>
+    </div>
+}
 <!-- Week Cards -->
 @foreach (var week in Model)
 {
@@ -64,11 +75,9 @@
                         <td>@menuDay.Notes</td>
                         <td>@menuDay.Option</td>
                         <td>
-                            @*
+                            
                             @{
-                                var marked = ((List<int>)ViewBag.MarkedMenuIds).Contains(menuDay.id);
-                                var remaining = menuDay.maxseats - (((Dictionary<int, int>)ViewBag.RemainingSeats)
-                                .GetValueOrDefault(menuDay.id, 0));
+                                var marked = ((List<int>)ViewBag.MarkedMenuIds).Contains(menuDay.Id);
                             }
 
                             @if (marked)
@@ -77,13 +86,18 @@
                             }
                             else
                             {
-                                <a asp-action="Marcar"
-                                   asp-route-menuId="@menuDay.Id"
-                                   class="btn btn-success btn-sm">
-                                    Marcar (@remaining)
-                                </a>
+                                <form asp-action="Marcar"
+                                      asp-route-menuId="@menuDay.Id"
+                                      asp-route-option="@(menuDay.Option == "Não-Vegan" ? "A" : "B")"
+                                      method="post"
+                                      style="display:inline">
+                                    <button type="submit"
+                                            class="admin-btn-danger"
+                                            onclick="return confirm('Marcar este Menu?')">
+                                        Marcar (@menuDay.MaxSeats)
+                                    </button>
+                                </form>
                             }
-                            *@
                         </td>
                     </tr>
                 }

@@ -38,7 +38,15 @@ namespace BarEscolarM8.Controllers
             return View(prodxcat);
         }
 
-        public IActionResult CreateProduct() => View("CreateProduct");
+        public async Task<IActionResult> CreateProduct()
+        {
+            var client = _clientFactory.CreateClient("APIBarescola");
+            var token = User.FindFirst("JWToken")?.Value;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var catResponse = await client.GetFromJsonAsync<IEnumerable<CategoryDto>>("api/Category");
+            ViewBag.Categories = catResponse;
+            return View("CreateProduct");
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateProduct(ProductCreateDto model)
@@ -47,6 +55,8 @@ namespace BarEscolarM8.Controllers
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await client.PostAsJsonAsync("api/Product/", model);
+            var catResponse = await client.GetFromJsonAsync<IEnumerable<CategoryDto>>("api/Category");
+            ViewBag.Categories = catResponse;
             if (response.IsSuccessStatusCode)
             {
                 TempData["Success"] = "Product created successfully!";
@@ -63,6 +73,8 @@ namespace BarEscolarM8.Controllers
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await client.GetFromJsonAsync<ProductCreateDto>($"api/Product/{id}");
+            var catResponse = await client.GetFromJsonAsync<IEnumerable<CategoryDto>>("api/Category");
+            ViewBag.Categories = catResponse;
             if (response == null)
             {
                 ModelState.AddModelError("", "Erro ao encontar o produto");
@@ -78,6 +90,8 @@ namespace BarEscolarM8.Controllers
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await client.PutAsJsonAsync($"api/Product/update/{id}", model);
+            var catResponse = await client.GetFromJsonAsync<IEnumerable<CategoryDto>>("api/Category");
+            ViewBag.Categories = catResponse;
             if (response.IsSuccessStatusCode)
             {
                 TempData["Success"] = "Product updated successfully!";

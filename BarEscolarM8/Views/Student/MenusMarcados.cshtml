@@ -1,0 +1,79 @@
+﻿@model IEnumerable<BarEscolarM8.Models.MenuMarcadoDto>
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Histórico de Menus";
+}
+@if (TempData["MenusMarcados"] is string erro)
+{
+    <div class="alert alert-danger text-center mb-3">
+        <p class="mb-1">@erro</p>
+    </div>
+}
+
+<h1 class="historico-title">Histórico — @User.FindFirst("FullName").Value</h1>
+
+
+
+@if (!Model.Any())
+{
+    <p class="historico-empty">Não existem pedidos no histórico.</p>
+}
+else
+{
+    <div class="historico-table-wrapper">
+        <table class="table historico-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Sobremesa</th>
+                    <th>Sopa</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item?.Date</td>
+                        <td>@item.MainDish</td>
+                        <td>@(item.Option == "A" ? "Não-Vegan" : "Vegan")</td>
+                        <td>@item.Dessert</td>
+                        <td>@item.Soup</td>
+                        <td>
+                            @if (item.Status == false)
+                            {
+                                <span class="status-cancelled">Cancelado</span>
+                            }
+                            else if (item.Date < DateOnly.FromDateTime(DateTime.Today))
+                            {
+                                <span class="status-completed">Concluído</span>
+                            }
+                            else
+                            {
+                                <form asp-action="CancelOrder"
+                                      asp-route-orderId="@item.OrderId"
+                                      method="post"
+                                      style="display:inline">
+                                    <button type="submit"
+                                            class="admin-btn-danger"
+                                            onclick="return confirm('Cancelar este Menu?')">
+                                            Desmarcar
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <center>
+            <a asp-action="Index" class="btn btn-primary mt-3">
+                Voltar aos Menus
+            </a>
+        </center>
+    </div>
+}

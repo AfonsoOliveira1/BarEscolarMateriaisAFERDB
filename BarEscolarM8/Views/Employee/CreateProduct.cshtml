@@ -36,9 +36,15 @@
 
             <div class="form-group">
                 <label asp-for="CategoryId" class="form-label">Categoria</label>
-                <input asp-for="CategoryId" type="number" class="form-input" />
+                <select asp-for="CategoryId" class="form-input">
+                    @foreach (CategoryDto cat in ViewBag.Categories)
+                    {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                </select>
                 <span asp-validation-for="CategoryId" class="validation-error"></span>
             </div>
+
 
             <div class="row">
                 <div class="col-md-4 form-group">
