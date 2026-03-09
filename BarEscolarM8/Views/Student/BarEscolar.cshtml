@@ -1,4 +1,10 @@
 ﻿@model IEnumerable<BarEscolarM8.Models.ProductDto>
+@{
+    var categorias = ViewBag.Categorias as IEnumerable<dynamic>;
+    int? selectedCategoryId = (int?)ViewBag.SelectedCategoryId;
+    string minPrice = ViewBag.MinPrice as string;
+    string maxPrice = ViewBag.MaxPrice as string;
+}
 
 @if (TempData["ErroCompra"] is string erro)
 {
@@ -14,6 +20,52 @@
             <a asp-action="ProdutosComprados" class="btn btn-primary">Produtos Marcados</a>
         </center>
     </div>
+
+<form method="get" asp-action="BarEscolar" class="mb-4">
+    <div class="row g-3">
+
+        <div class="col-md-3">
+            <label class="form-label">Categoria</label>
+                <select name="categoryId" class="form-select">
+                    <option value="">Todas</option>
+                    @if (categorias != null)
+                    {
+                        foreach (var c in categorias)
+                        {
+                            <option value="@c.CategoryId"
+                                    selected="@(selectedCategoryId == (int?)c.CategoryId ? "selected" : null)">
+                                @c.CategoryName
+                            </option>
+                        }
+                    }
+                </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Preço Mínimo</label>
+                <input type="number"
+                       name="minPrice"
+                       step="0.01"
+                       class="form-control"
+                       value="@minPrice" />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Preço Máximo</label>
+                <input type="number"
+                       name="maxPrice"
+                       step="0.01"
+                       class="form-control"
+                       value="@maxPrice" />
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+
+    </div>
+</form>
+
 
     <table class="admin-table">
         <thead>

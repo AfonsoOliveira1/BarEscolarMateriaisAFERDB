@@ -8,7 +8,7 @@
         public string MainDish { get; set; }
         public string Soup { get; set; }
         public string Dessert { get; set; }
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
         public int? MaxSeats { get; set; }
     }
 }

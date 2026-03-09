@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace BarEscolarM8.Controllers
 {
@@ -91,7 +92,7 @@ namespace BarEscolarM8.Controllers
             return RedirectToAction("MenusMarcados");
         }
         // ---------------- MATERIAIS ----------------
-        public async Task<IActionResult> Materiais()
+        public async Task<IActionResult> Materiais(int? categoryId, string? minPrice, string? maxPrice)
         {
             var client = _clientFactory.CreateClient("APIBarescola");
             var token = User.FindFirst("JWToken")?.Value;
@@ -107,10 +108,45 @@ namespace BarEscolarM8.Controllers
                 return View(new List<MaterialViewModel>().AsEnumerable());
             }
 
-            var data = await httpResponse.Content.ReadFromJsonAsync<IEnumerable<MaterialViewModel>>();
+            var allMaterials = await httpResponse.Content.ReadFromJsonAsync<IEnumerable<MaterialViewModel>>();
 
-            return View(data);
+            // Criar lista de categorias
+            var categorias = allMaterials
+                .Select(m => new { CategoryId = m.Categoryid, CategoryName = $"Categoria {m.Categoryid}" })
+                .Distinct()
+                .OrderBy(c => c.CategoryId)
+                .ToList();
+
+            ViewBag.Categorias = categorias;
+            ViewBag.SelectedCategoryId = categoryId;
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+
+            decimal? min = null;
+            decimal? max = null;
+
+            if (!string.IsNullOrWhiteSpace(minPrice) &&
+                decimal.TryParse(minPrice, NumberStyles.Any, CultureInfo.InvariantCulture, out var minParsed))
+                min = minParsed;
+
+            if (!string.IsNullOrWhiteSpace(maxPrice) &&
+                decimal.TryParse(maxPrice, NumberStyles.Any, CultureInfo.InvariantCulture, out var maxParsed))
+                max = maxParsed;
+
+            var materials = allMaterials;
+
+            if (categoryId.HasValue)
+                materials = materials.Where(m => m.Categoryid == categoryId.Value);
+
+            if (min.HasValue)
+                materials = materials.Where(m => m.Price >= min.Value);
+
+            if (max.HasValue)
+                materials = materials.Where(m => m.Price <= max.Value);
+
+            return View(materials);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> ComprarMaterial(int materialId, int quantidade)
@@ -183,17 +219,56 @@ namespace BarEscolarM8.Controllers
             return RedirectToAction("Historico", new { id = User.FindFirst(ClaimTypes.NameIdentifier).Value });
         }
         // ---------------- PRODUTOS ---------------- 
-        public async Task<IActionResult> BarEscolar()
+        public async Task<IActionResult> BarEscolar(int? categoryId, string? minPrice, string? maxPrice)
         {
             var client = _clientFactory.CreateClient("APIBarescola");
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await client.GetFromJsonAsync<IEnumerable<ProductDto>>("api/Product");
 
-            return View(response);
+            var allProducts = await client.GetFromJsonAsync<IEnumerable<ProductDto>>("api/Product");
+
+            var categorias = allProducts
+                .Where(p => p.CategoryId.HasValue)
+                .Select(p => new { CategoryId = p.CategoryId.Value, p.CategoryName })
+                .Distinct()
+                .OrderBy(c => c.CategoryName)
+                .ToList();
+
+            ViewBag.Categorias = categorias;
+            ViewBag.SelectedCategoryId = categoryId;
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+
+            decimal? min = null;
+            decimal? max = null;
+
+            if (!string.IsNullOrWhiteSpace(minPrice) &&
+                decimal.TryParse(minPrice, NumberStyles.Any, CultureInfo.InvariantCulture, out var minParsed))
+            {
+                min = minParsed;
+            }
+
+            if (!string.IsNullOrWhiteSpace(maxPrice) &&
+                decimal.TryParse(maxPrice, NumberStyles.Any, CultureInfo.InvariantCulture, out var maxParsed))
+            {
+                max = maxParsed;
+            }
+
+            var products = allProducts;
+
+            if (categoryId.HasValue)
+                products = products.Where(p => p.CategoryId == categoryId.Value);
+
+            if (min.HasValue)
+                products = products.Where(p => p.Price >= min.Value);
+
+            if (max.HasValue)
+                products = products.Where(p => p.Price <= max.Value);
+
+            return View(products);
         }
 
-        public async Task<IActionResult> Details(int id)
+    public async Task<IActionResult> Details(int id)
         {
             var client = _clientFactory.CreateClient("APIBarescola");
             var token = User.FindFirst("JWToken")?.Value;

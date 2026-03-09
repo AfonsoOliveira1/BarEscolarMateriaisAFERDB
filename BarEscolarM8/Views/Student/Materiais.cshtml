@@ -1,5 +1,11 @@
 ﻿@model IEnumerable<BarEscolarM8.Models.MaterialViewModel>
 @using System.Security.Claims;
+@{
+    var categorias = ViewBag.Categorias as IEnumerable<dynamic>;
+    int? selectedCategoryId = (int?)ViewBag.SelectedCategoryId;
+    string minPrice = ViewBag.MinPrice as string;
+    string maxPrice = ViewBag.MaxPrice as string;
+}
 
 @if (TempData["ErroMateriais"] is string erro)
 {
@@ -8,62 +14,102 @@
     </div>
 }
 
-@if (Model.Any())
-{
-    <h1 class="page-title">
-        Loja de Materiais
-    </h1>
+<h1 class="page-title">
+    Loja de Materiais
+</h1>
 
-    <div class="top-buttons">
-        <center>
-            <a asp-action="Historico" asp-route-id="@User.FindFirst(ClaimTypes.NameIdentifier).Value" class="btn btn-primary">Histórico de Materiais</a>
-        </center>
-    </div>
+<div class="top-buttons">
+    <center>
+        <a asp-action="Historico" asp-route-id="@User.FindFirst(ClaimTypes.NameIdentifier).Value" class="btn btn-primary">Histórico de Materiais</a>
+    </center>
+</div>
 
-    <div class="admin-table-wrapper mb-5">
-        <h3 class="text-center mb-3">Materiais</h3>
+<div class="admin-table-wrapper mb-5">
+    <h3 class="text-center mb-3">Materiais</h3>
 
-        <table class="admin-table">
-            <thead>
+    <form method="get" asp-action="Materiais" class="mb-4">
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <label class="form-label">Categoria</label>
+                <select name="categoryId" class="form-select">
+                    <option value="">Todas</option>
+                    @foreach (var c in categorias)
+                    {
+                        <option value="@c.CategoryId"
+                                selected="@(selectedCategoryId == (int?)c.CategoryId ? "selected" : null)">
+                            @c.CategoryName
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Preço Mínimo</label>
+                <input type="number"
+                        name="minPrice"
+                        step="0.01"
+                        class="form-control"
+                        value="@minPrice" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Preço Máximo</label>
+                <input type="number"
+                        name="maxPrice"
+                        step="0.01"
+                        class="form-control"
+                        value="@maxPrice" />
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+
+        </div>
+    </form>
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Descrição</th>
+                <th>Preço</th>
+                <th>Stock</th>
+                <th style="width: 160px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
                 <tr>
-                    <th>Nome</th>
-                    <th>Categoria</th>
-                    <th>Descrição</th>
-                    <th>Preço</th>
-                    <th>Stock</th>
-                    <th style="width: 160px;"></th>
+                    <td>@p.Name</td>
+                    <td>@p.Categoryid</td>
+                    <td>@p.Description</td>
+                    <td>@p.Price.ToString("F2") €</td>
+                    <td>@p.Stock</td>
+                    <td>
+                        <form asp-action="ComprarMaterial" asp-route-materialId="@p.Id" method="post" class="d-flex align-items-center gap-2">
+                            <input type="number"
+                                    name="quantidade"
+                                    class="form-control form-control-sm"
+                                    value="1"
+                                    min="1"
+                                    max="@p.Stock"
+                                    style="width: 80px;" />
+
+                            <button type="submit" class="btn btn-success btn-sm">
+                                Comprar
+                            </button>
+                        </form>
+
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var p in Model)
-                {
-                    <tr>
-                        <td>@p.Name</td>
-                        <td>@p.Categoryid</td>
-                        <td>@p.Description</td>
-                        <td>@p.Price.ToString("F2") €</td>
-                        <td>@p.Stock</td>
-                        <td>
-                            <form asp-action="ComprarMaterial" asp-route-materialId="@p.Id" method="post" class="d-flex align-items-center gap-2">
-                                <input type="number"
-                                       name="quantidade"
-                                       class="form-control form-control-sm"
-                                       value="1"
-                                       min="1"
-                                       max="@p.Stock"
-                                       style="width: 80px;" />
+            }
+        </tbody>
+    </table>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
 
-                                <button type="submit" class="btn btn-success btn-sm">
-                                    Comprar
-                                </button>
-                            </form>
+</div>
 
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        <a asp-action="Index" class="btn btn-secondary">Back</a>
-
-    </div>
-}
