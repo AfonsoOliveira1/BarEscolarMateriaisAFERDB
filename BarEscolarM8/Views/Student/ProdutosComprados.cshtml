@@ -4,23 +4,21 @@
 @{
     ViewData["Title"] = "Histórico de Produtos";
 }
-@if (TempData["Erro"] is string erro)
-{
-    <div class="alert alert-danger text-center mb-3">
-        <p class="mb-1">@erro</p>
-    </div>
-}
-
-<h1 class="historico-title">Histórico — @User.FindFirst("FullName").Value</h1>
-
 
 
 @if (!Model.Any())
 {
-    <p class="historico-empty">Não existem pedidos no histórico.</p>
+    @if (TempData["Erro"] is string erro)
+    {
+        <div class="alert alert-danger text-center mb-3">
+            <p class="mb-1">@erro</p>
+        </div>
+    }
 }
 else
 {
+    <h1 class="historico-title">Histórico — @User.FindFirst("FullName").Value</h1>
+
     <div class="historico-table-wrapper">
         <table class="table historico-table">
             <thead>
@@ -61,10 +59,10 @@ else
                 }
             </tbody>
         </table>
-        <center>
-            <a asp-action="BarEscolar" class="btn btn-primary mt-3">
-                Voltar aos Menus
-            </a>
-        </center>
     </div>
 }
+<center>
+    <a asp-action="Index" class="btn btn-primary mt-3">
+        Voltar aos Menus
+    </a>
+</center>

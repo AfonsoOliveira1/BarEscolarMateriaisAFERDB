@@ -5,6 +5,18 @@
 }
 
 <h2>Detalhes do Produto</h2>
+<div class="text-center mb-3">
+    @if (string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <span class="text-muted">Sem imagem disponível</span>
+    }
+    else
+    {
+        <img src="@Model.ImageUrl"
+             alt="@Model.Name"
+             style="max-width: 250px; border-radius: 8px; border: 1px solid #ddd;" />
+    }
+</div>
 
 <div class="card mt-3">
     <div class="card-body">

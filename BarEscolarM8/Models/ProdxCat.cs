@@ -4,5 +4,6 @@
     {
         public IEnumerable<ProductDto> Products { get; set; }
         public IEnumerable<CategoryDto> Categorys { get; set; }
+        public IEnumerable<SaldoRequestDto> Saldos { get; set; }
     }
 }

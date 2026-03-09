@@ -16,6 +16,7 @@
         <table class="admin-table">
             <thead>
                 <tr>
+                    <th>Imagem</th>
                     <th>Nome</th>
                     <th>Categoria</th>
                     <th>Preço</th>
@@ -28,6 +29,16 @@
                 @foreach (var p in Model.Products)
                 {
                     <tr>
+                        <td class="text-center mb-3">
+                            @if (string.IsNullOrEmpty(p.ImageUrl))
+                            {
+                                <span>Sem Imagem</span>
+                            }
+                            else
+                            {
+                                <img src="@p.ImageUrl" style="width:80px; height:auto;" />
+                            }
+                        </td>
                         <td>@p.Name</td>
                         <td>@p.CategoryName</td>
                         <td>@p.Price?.ToString("F2") €</td>
@@ -58,7 +69,7 @@
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>Id</th>
+                    <th>Imagem</th>
                     <th>Nome</th>
                     <th>Descrição</th>
                     <th style="width: 160px;"></th>
@@ -68,7 +79,16 @@
                 @foreach (var c in Model.Categorys)
                 {
                     <tr>
-                        <td>@c.Id</td>
+                        @if (string.IsNullOrEmpty(c.ImageUrl))
+                        {
+                            <td>Sem Imagem</td>
+                        }
+                        else
+                        {
+                            <td>
+                                <img src="@c.ImageUrl" style="width:80px; height:auto;" />
+                            </td>
+                        }
                         <td>@c.Name</td>
                         <td>@c.Description</td>
                         <td>
@@ -88,6 +108,49 @@
                                     Eliminar
                                 </button>
                             </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SALDO INDEX -->
+    <div class="admin-table-wrapper">
+        <h3 class="text-center mb-3">Pedidos de Saldo</h3>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Nome</th>
+                    <th>Saldo Antigo</th>
+                    <th>Saldo Pedido</th>
+                    <th style="width: 160px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model.Saldos)
+                {
+                    <tr>
+                        <td>@s.RequestDate</td>
+                        <td>@s.UserName</td>
+                        <td>@s.Saldo</td>
+                        <td>@s.SaldoToUpdate</td>
+                        <td>
+                            <form asp-action="SaldoAceite" asp-route-id="@s.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-success me-2">
+                                    Aceitar
+                                </button>
+                            </form>
+
+
+                            <form asp-action="SaldoRejeitado" asp-route-id="@s.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger">
+                                    Rejeitar
+                                </button>
+                            </form>
+
                         </td>
                     </tr>
                 }

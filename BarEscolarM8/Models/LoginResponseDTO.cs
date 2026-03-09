@@ -27,6 +27,9 @@ namespace BarEscolarM8.Models
 
         [JsonPropertyName("role")]
         public string Role { get; set; } = "STUDENT";
+
+        [JsonPropertyName("saldo")]
+        public decimal? Saldo { get; set; }
     }
 
 }

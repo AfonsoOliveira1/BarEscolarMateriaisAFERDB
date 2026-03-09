@@ -109,6 +109,16 @@
                 Ativo
             </label>
 
+            <div class="form-group">
+                <label asp-for="ImageUrl" class="form-label">Imagem (URL)</label>
+                <input asp-for="ImageUrl" class="form-input" id="imageUrlInput" />
+                <span asp-validation-for="ImageUrl" class="validation-error"></span>
+            </div>
+
+            <div class="text-center mt-3">
+                <img id="imagePreview" src="" alt="Preview" style="max-width: 200px; display:none; border:1px solid #ccc; padding:5px;" />
+            </div>
+
             <div class="d-flex gap-2 mt-3">
                 <button type="submit" class="btn btn-primary flex-fill">Guardar Alterações</button>
                 <a asp-action="Index" class="btn btn-secondary flex-fill">Cancel</a>
@@ -116,3 +126,18 @@
         </form>
     </div>
 </div>
+
+<script>
+    const input = document.getElementById("imageUrlInput");
+    const preview = document.getElementById("imagePreview");
+
+    input.addEventListener("input", () => {
+        const url = input.value.trim();
+        if (url) {
+            preview.src = url;
+            preview.style.display = "block";
+        } else {
+            preview.style.display = "none";
+        }
+    });
+</script>

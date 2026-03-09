@@ -77,7 +77,8 @@
                         <td>
                             
                             @{
-                                var marked = ((List<int>)ViewBag.MarkedMenuIds).Contains(menuDay.Id);
+                                var markedList = ViewBag.MarkedMenuIds as List<int> ?? new List<int>();
+                                var marked = markedList.Contains(menuDay.Id);
                             }
 
                             @if (marked)
@@ -88,7 +89,7 @@
                             {
                                 <form asp-action="Marcar"
                                       asp-route-menuId="@menuDay.Id"
-                                      asp-route-option="@(menuDay.Option == "Não-Vegan" ? "A" : "B")"
+                                      asp-route-option="@(menuDay.Option == "Non-Vegan" ? "A" : "B")"
                                       method="post"
                                       style="display:inline">
                                     <button type="submit"

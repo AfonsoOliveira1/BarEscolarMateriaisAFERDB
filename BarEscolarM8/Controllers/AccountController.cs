@@ -44,6 +44,7 @@ namespace BarEscolarM8.Controllers
                         new Claim(ClaimTypes.Name, user.UserName),
                         new Claim(ClaimTypes.Email, user.Email),
                         new Claim(ClaimTypes.Role, user.Role?.ToString().ToUpper() ?? "STUDENT"),
+                        new Claim("Saldo", user.Saldo?.ToString() ?? "0"),
                         new Claim("FullName", user.FullName),
                         new Claim("JWToken", loginResponse.Token),
                     };

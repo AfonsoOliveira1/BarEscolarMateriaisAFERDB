@@ -28,11 +28,13 @@ namespace BarEscolarM8.Controllers
 
             var prodResponse = await client.GetFromJsonAsync<IEnumerable<ProductDto>>("api/Product");
             var catResponse = await client.GetFromJsonAsync<IEnumerable<CategoryDto>>("api/Category");
+            var saldoResponse = await client.GetFromJsonAsync<IEnumerable<SaldoRequestDto>>("api/User/saldo/requests");
 
             var prodxcat = new ProdxCat
             {
                 Products = prodResponse,
-                Categorys = catResponse
+                Categorys = catResponse,
+                Saldos = saldoResponse
             };
 
             return View(prodxcat);
@@ -182,6 +184,27 @@ namespace BarEscolarM8.Controllers
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await client.DeleteAsync($"api/Category/delete/{id}");
 
+            return RedirectToAction("Index");
+        }
+
+        // ---------- SALDO REQUEST --------------
+        [HttpPost]
+        public async Task<IActionResult> SaldoAceite(int id)
+        {
+            var client = _clientFactory.CreateClient("APIBarescola");
+            var token = User.FindFirst("JWToken")?.Value;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await client.PutAsync($"/api/User/SaldoAceite/{id}", null);
+            return RedirectToAction("Index");
+
+        }
+        [HttpPost]
+        public async Task<IActionResult> SaldoRejeitado(int id)
+        {
+            var client = _clientFactory.CreateClient("APIBarescola");
+            var token = User.FindFirst("JWToken")?.Value;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await client.DeleteAsync($"/api/User/saldo/delete/{id}");
             return RedirectToAction("Index");
         }
     }

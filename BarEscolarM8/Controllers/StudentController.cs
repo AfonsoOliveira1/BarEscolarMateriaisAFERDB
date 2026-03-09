@@ -36,7 +36,10 @@ namespace BarEscolarM8.Controllers
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await client.GetFromJsonAsync<IEnumerable<MenuWeekDto>>($"api/MenuWeek/option/{option}");
             var usermenus = await client.GetFromJsonAsync<IEnumerable<MenuMarcadoDto>>($"/api/MenuDay/MenusMarked/User/{user}");
-            ViewBag.MarkedMenuIds = usermenus.Select(u => u.Id).ToList();
+            if (usermenus.Any())
+            {
+                ViewBag.MarkedMenuIds = usermenus.Select(u => u.Id).ToList();
+            }
             return View(response);
         }
 
@@ -198,6 +201,7 @@ namespace BarEscolarM8.Controllers
             }
             return RedirectToAction("BarEscolar");
         }
+
         public async Task<IActionResult> ProdutosComprados()
         {
             var user = User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -205,7 +209,31 @@ namespace BarEscolarM8.Controllers
             var token = User.FindFirst("JWToken")?.Value;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var userprodutos = await client.GetFromJsonAsync<IEnumerable<ProductBoughtDto>>($"/api/Product/ProductsBought/User/{user}");
+            if (!userprodutos.Any())
+            {
+                TempData["Erro"] = "Não Tem Produtos Comprados";
+                return View(Enumerable.Empty<ProductBoughtDto>());
+            }
             return View(userprodutos);
+        }
+
+        // ---------- SALDO REQUEST --------------
+        public IActionResult SaldoUpdate() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> SaldoUpdate(decimal saldo)
+        {
+            var user = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var client = _clientFactory.CreateClient("APIBarescola");
+            var token = User.FindFirst("JWToken")?.Value;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var saldorequest = await client.PostAsJsonAsync($"/api/User/saldo/request/{user}", saldo);
+            if (!saldorequest.IsSuccessStatusCode)
+            {
+                ModelState.AddModelError("", "Saldo Invalido");
+                return View();
+            }
+            return RedirectToAction("Index");
         }
     }
 }
