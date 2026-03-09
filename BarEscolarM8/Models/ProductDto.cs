@@ -8,7 +8,7 @@ namespace BarEscolarM8.Models
         public string? ImageUrl { get; set; }
 
         public int Id { get; set; }
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
         public int? CategoryId { get; set; }
@@ -17,7 +17,7 @@ namespace BarEscolarM8.Models
         public int? Fat { get; set; }
         public int? Carbs { get; set; }
         public int? Salt { get; set; }
-        public string Allergens { get; set; }
+        public string? Allergens { get; set; }
         public int? Stock { get; set; }
         public bool? IsActive { get; set; }
 

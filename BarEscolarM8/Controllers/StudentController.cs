@@ -131,8 +131,23 @@ namespace BarEscolarM8.Controllers
                 TempData["ErroMateriais"] = error;
                 return RedirectToAction("Materiais");
             }
-            var result = await response.Content.ReadAsStringAsync();
 
+            var userid = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var usersResponse = await client.GetFromJsonAsync<UserReadDto>($"api/User/{userid}");
+            var identity = (ClaimsIdentity)User.Identity;
+
+            var oldClaim = identity.FindFirst("Saldo");
+            if (oldClaim != null)
+            {
+                identity.RemoveClaim(oldClaim);
+            }
+
+            identity.AddClaim(new Claim("Saldo", usersResponse.Saldo.ToString()));
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity)
+            );
             return RedirectToAction("Materiais");
         }
 
@@ -199,6 +214,23 @@ namespace BarEscolarM8.Controllers
                 TempData["ErroCompra"] = error;
                 return RedirectToAction("BarEscolar");
             }
+            var userid = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var usersResponse = await client.GetFromJsonAsync<UserReadDto>($"api/User/{userid}");
+            var identity = (ClaimsIdentity)User.Identity;
+
+            var oldClaim = identity.FindFirst("Saldo");
+            if (oldClaim != null)
+            {
+                identity.RemoveClaim(oldClaim);
+            }
+
+            identity.AddClaim(new Claim("Saldo", usersResponse.Saldo.ToString()));
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity)
+            );
+
             return RedirectToAction("BarEscolar");
         }
 

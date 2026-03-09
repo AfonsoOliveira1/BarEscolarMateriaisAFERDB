@@ -28,7 +28,7 @@ else
                     <th>Categoria</th>
                     <th>Descrição</th>
                     <th>Preço</th>
-                    <th>Stock</th>
+                    <th>Qtd</th>
                     <th></th>
                 </tr>
             </thead>
@@ -42,7 +42,7 @@ else
                         <td>@item.CategoryName</td>
                         <td>@item.Description</td>
                         <td>@item.Price</td>
-                        <td>@item.Stock</td>
+                        <td>@item.Qtd</td>
                         <td>
                             <form asp-action="DeleteOrder"
                                   asp-route-orderId="@item.OrderId"

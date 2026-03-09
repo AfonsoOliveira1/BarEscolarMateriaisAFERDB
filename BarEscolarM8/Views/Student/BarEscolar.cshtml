@@ -32,6 +32,10 @@
         <tbody>
             @foreach (var p in Model)
             {
+                @if(p.Stock <= 0)
+                {
+                    continue; // Skip products that are out of stock
+				}
                 <tr>
                     <td class="text-center mb-3">
                         @if (string.IsNullOrEmpty(p.ImageUrl))
@@ -45,7 +49,7 @@
                     </td>
                     <td>@p.Name</td>
                     <td>@p.CategoryName</td>
-                    <td>@p.Price?.ToString("F2") €</td>
+                    <td>@p.Price.ToString("F2") €</td>
                     <td>@p.Stock</td>
                     <td>@p.Description</td>
                     <td>

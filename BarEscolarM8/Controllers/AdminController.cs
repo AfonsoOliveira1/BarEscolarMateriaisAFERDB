@@ -30,8 +30,8 @@ namespace BarEscolarM8.Controllers
             var usersResponse = await client.GetFromJsonAsync<IEnumerable<UserReadDto>>("api/User");
             var prodResponse = await client.GetFromJsonAsync<IEnumerable<ProductDto>>("api/Product");
             var catResponse = await client.GetFromJsonAsync<IEnumerable<CategoryDto>>("api/Category");
-            //var matResponse = await client.GetFromJsonAsync<IEnumerable<>>("api/Material");
-           // var matcatResponse = await client.GetFromJsonAsync<IEnumerable<>>("api/MaterialCategory");
+            var matResponse = await client.GetFromJsonAsync<IEnumerable<MaterialViewModel>>("api/Material");
+            var matcatResponse = await client.GetFromJsonAsync<IEnumerable<MaterialCategoryViewDto>>("api/MaterialCategory");
             var daysResponse = await client.GetFromJsonAsync<IEnumerable<MenuDayDto>>("api/MenuDay");
 
             var userxweek = new WeekXUsers();
@@ -42,8 +42,8 @@ namespace BarEscolarM8.Controllers
             userxweek.Counts.weeksCount = weeksResponse?.Count() ?? 0;
             userxweek.Counts.usersCount = usersResponse?.Count() ?? 0;
             userxweek.Counts.daysCount = daysResponse?.Count() ?? 0;
-            userxweek.Counts.matCount = 0;//matResponse?.Count() ?? 0;
-            userxweek.Counts.matcatCount = 0;// matcatResponse?.Count() ?? 0;
+            userxweek.Counts.matCount = matResponse?.Count() ?? 0;
+            userxweek.Counts.matcatCount = matcatResponse?.Count() ?? 0;
             userxweek.Counts.prodCount = prodResponse?.Count() ?? 0;
             userxweek.Counts.catCount = catResponse?.Count() ?? 0;
 

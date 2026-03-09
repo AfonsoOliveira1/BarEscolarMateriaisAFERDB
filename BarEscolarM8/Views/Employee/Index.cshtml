@@ -41,7 +41,7 @@
                         </td>
                         <td>@p.Name</td>
                         <td>@p.CategoryName</td>
-                        <td>@p.Price?.ToString("F2") €</td>
+                        <td>@p.Price.ToString("F2") €</td>
                         <td>@p.Stock</td>
                         <td>
                             <span class="@(p.IsActive == true ? "status-marked" : "status-cancelled")">
